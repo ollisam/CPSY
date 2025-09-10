@@ -50,7 +50,7 @@ def main():
 
             # Configure logging once at program start
             logging.basicConfig(
-                filename="magnetometer2.log",  # or None for console only
+                filename="NO_10KOhm.log",  # or None for console only
                 level=logging.INFO,
                 format="%(asctime)s - %(levelname)s - %(message)s"
             )
