@@ -1,8 +1,3 @@
-# SPDX-FileCopyrightText: 2019 Mikey Sklar for Adafruit Industries
-#
-# SPDX-License-Identifier: MIT
-
-import os
 import time
 import busio
 import digitalio
@@ -10,21 +5,20 @@ import board
 import adafruit_mcp3xxx.mcp3008 as MCP
 from adafruit_mcp3xxx.analog_in import AnalogIn
 
-# create the spi bus
+# Create the SPI bus
 spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
 
-# create the cs (chip select)
-cs = digitalio.DigitalInOut(board.D22)
+# Use the hardware chip select CE0 (pin 24 on Pi header, SPI0 CE0)
+cs = digitalio.DigitalInOut(board.CE0)
 
-# create the mcp object
+# Create the MCP3008 object
 mcp = MCP.MCP3008(spi, cs)
 
-# create an analog input channel on pin 0
+# Select channel 0 on the MCP3008
 chan0 = AnalogIn(mcp, MCP.P0)
 
+# Loop forever, print raw and voltage
 while True:
-
-    print('Raw ADC Value: ', chan0.value)
-    print('ADC Voltage: ' + str(chan0.voltage) + 'V')
-
-    time.sleep(2)
+    print("Raw ADC Value: ", chan0.value)
+    print(f"ADC Voltage: {chan0.voltage:.3f} V")
+    time.sleep(1)
