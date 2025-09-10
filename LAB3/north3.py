@@ -49,14 +49,14 @@ def main():
             print(f"Heading: {heading:.2f} degrees")
 
             # Configure logging once at program start
-            # logging.basicConfig(
-            #     filename="10KOhm.log",  # or None for console only
-            #     level=logging.INFO,
-            #     format="%(asctime)s - %(levelname)s - %(message)s"
-            # )
+            logging.basicConfig(
+                filename="Correct_10KOhm.log",  # or None for console only
+                level=logging.INFO,
+                format="%(asctime)s - %(levelname)s - %(message)s"
+            )
 
-            # # Then in your loop
-            # logging.info(f"Magnetometer X:{mx:.2f}, Y:{my:.2f}, Z:{mz:.2f}, Heading:{heading:.2f}")
+            # Then in your loop
+            logging.info(f"Magnetometer X:{mx:.2f}, Y:{my:.2f}, Z:{mz:.2f}, Heading:{heading:.2f}")
 
             # LED on if facing roughly North (±15°)
             red_led_pin.value = is_north(heading, threshold_deg=15)
