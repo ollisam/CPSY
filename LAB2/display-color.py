@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import time
 import board, busio
 from PIL import Image, ImageDraw, ImageFont
@@ -17,8 +18,8 @@ oled = SSD1306_I2C(WIDTH, HEIGHT, i2c, addr=OLED_ADDR)
 oled.fill(0); oled.show()
 
 # Color sensor
-tcs = adafruit_tcs34725.TCS34725(i2c)   # sensor address (i2cdetect shows 0x29)
-tcs.integration_time = 100              # ms
+tcs = adafruit_tcs34725.TCS34725(i2c)   # default addr 0x29 (i2cdetect shows 29)
+tcs.integration_time = 600              # ms
 tcs.gain = 16                           # 1, 4, 16, 60
 
 font = ImageFont.load_default()
@@ -28,7 +29,7 @@ while True:
     # Use gamma-corrected 0..255 values provided by the library
     r, g, b = tcs.color_rgb_bytes
 
-    # Draw only the RGB values
+    # Draw RGB values
     img = Image.new("1", (WIDTH, HEIGHT))
     d = ImageDraw.Draw(img)
     text_lines = [f"R: {r}", f"G: {g}", f"B: {b}"]
@@ -43,4 +44,3 @@ while True:
     oled.image(img)
     oled.show()
     time.sleep(period)
-

@@ -40,13 +40,12 @@ def compass_reading():
 
         if is_north(mag_x, mag_y):
             red_led_pin.value = True
-            print("Facing North!  ^=^y^b LED ON")
+            print("Facing North! 🙂 LED ON")
         else:
             red_led_pin.value = False
-            print("Not North.  ^=^y^a LED OFF")
+            print("Not North. 🙁 LED OFF")
 
         time.sleep(1)
 
 if __name__ == "__main__":
     compass_reading()
-

@@ -1,0 +1,13 @@
+[Unit]
+Description=display-ip
+After=network-online.target
+
+[Service]
+Type=simple
+User=georgingi
+WorkingDirectory=/home/georgingi/LAB2
+ExecStart=/home/georgingi/cpsy/bin/python3 /home/georgingi/LAB2/display-ip.py
+Restart=never
+
+[Install]
+WantedBy=multi-user.target

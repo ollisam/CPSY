@@ -24,9 +24,7 @@ while True:
 
     print(heading)
 
-    # LED on if facing North (  15  )
+    # LED on if facing North (±15°)
     led.value = (heading <= 15 or heading >= 345)
 
     time.sleep(0.2)
-
-

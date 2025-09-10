@@ -1,3 +1,5 @@
+import time
+import math
 import board
 import busio
 import digitalio
@@ -5,7 +7,7 @@ import adafruit_icm20x
 
 # ---------- I2C + Sensor ----------
 i2c = board.I2C()
-icm = adafruit_icm20x.ICM20948(i2c, address=0x68)
+icm = adafruit_icm20x.ICM20948(i2c, address=0x68)  # use 0x69 if AD0 is tied high
 
 # ---------- LED (BCM pin D25) ----------
 red_led_pin = digitalio.DigitalInOut(board.D25)
@@ -44,9 +46,9 @@ def main():
             print(f"Magnetometer X: {mx:.2f}, Y: {my:.2f}, Z: {mz:.2f}")
             print(f"Heading: {heading:.2f} degrees")
 
-            # LED on if facing roughly North (  15  )
+            # LED on if facing roughly North (±15°)
             red_led_pin.value = is_north(heading, threshold_deg=15)
-            print("Facing North!  ^=^y^b LED ON" if red_led_pin.value else "Not North.  ^=^y^a LED OFF")
+            print("Facing North! 🙂 LED ON" if red_led_pin.value else "Not North. 🙁 LED OFF")
             time.sleep(0.5)
 
     except KeyboardInterrupt:
@@ -56,5 +58,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
