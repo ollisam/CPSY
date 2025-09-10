@@ -4,6 +4,7 @@ import board
 import busio
 import digitalio
 import adafruit_icm20x
+import logging
 
 # ---------- I2C + Sensor ----------
 i2c = board.I2C()
@@ -45,6 +46,16 @@ def main():
             # Debug prints
             print(f"Magnetometer X: {mx:.2f}, Y: {my:.2f}, Z: {mz:.2f}")
             print(f"Heading: {heading:.2f} degrees")
+
+            # Configure logging once at program start
+            logging.basicConfig(
+                filename="magnetometer.log",  # or None for console only
+                level=logging.INFO,
+                format="%(asctime)s - %(levelname)s - %(message)s"
+            )
+
+            # Then in your loop
+            logging.info(f"Magnetometer X:{mx:.2f}, Y:{my:.2f}, Z:{mz:.2f}, Heading:{heading:.2f}")
 
             # LED on if facing roughly North (±15°)
             red_led_pin.value = is_north(heading, threshold_deg=15)
