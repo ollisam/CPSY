@@ -1,3 +1,5 @@
+
+NORTH
 2025-09-10 14:11:24,832 - INFO - Magnetometer X:78.45, Y:109.05, Z:-78.90, Heading:345.29
 2025-09-10 14:11:25,335 - INFO - Magnetometer X:77.25, Y:110.10, Z:-79.05, Heading:347.47
 2025-09-10 14:11:25,838 - INFO - Magnetometer X:79.05, Y:108.90, Z:-78.60, Heading:345.31
@@ -11,6 +13,8 @@
 2025-09-10 14:11:29,865 - INFO - Magnetometer X:79.05, Y:109.20, Z:-78.60, Heading:346.12
 2025-09-10 14:11:30,369 - INFO - Magnetometer X:78.45, Y:110.55, Z:-78.45, Heading:349.50
 2025-09-10 14:11:30,874 - INFO - Magnetometer X:80.70, Y:112.50, Z:-77.70, Heading:355.65
+
+WEST
 2025-09-10 14:11:31,378 - INFO - Magnetometer X:79.95, Y:122.25, Z:-78.15, Heading:21.16
 2025-09-10 14:11:31,882 - INFO - Magnetometer X:78.75, Y:122.55, Z:-78.30, Heading:23.07
 2025-09-10 14:11:32,386 - INFO - Magnetometer X:76.05, Y:124.80, Z:-77.55, Heading:32.03
@@ -33,6 +37,8 @@
 2025-09-10 14:11:40,944 - INFO - Magnetometer X:76.50, Y:126.00, Z:-78.60, Heading:34.14
 2025-09-10 14:11:41,448 - INFO - Magnetometer X:74.40, Y:125.40, Z:-78.90, Heading:36.19
 2025-09-10 14:11:41,952 - INFO - Magnetometer X:63.90, Y:125.85, Z:-79.65, Heading:67.38
+
+SOUTH
 2025-09-10 14:11:42,457 - INFO - Magnetometer X:60.30, Y:118.95, Z:-79.05, Heading:75.12
 2025-09-10 14:11:42,961 - INFO - Magnetometer X:59.40, Y:117.60, Z:-78.45, Heading:83.80
 2025-09-10 14:11:43,465 - INFO - Magnetometer X:58.95, Y:117.60, Z:-78.45, Heading:91.25
@@ -47,6 +53,8 @@
 2025-09-10 14:11:47,999 - INFO - Magnetometer X:58.80, Y:119.70, Z:-79.35, Heading:92.32
 2025-09-10 14:11:48,502 - INFO - Magnetometer X:59.40, Y:116.85, Z:-78.45, Heading:82.09
 2025-09-10 14:11:49,005 - INFO - Magnetometer X:59.55, Y:114.75, Z:-79.80, Heading:48.81
+
+EAST
 2025-09-10 14:11:49,508 - INFO - Magnetometer X:66.00, Y:105.30, Z:-78.00, Heading:308.24
 2025-09-10 14:11:50,011 - INFO - Magnetometer X:69.15, Y:104.85, Z:-78.15, Heading:317.43
 2025-09-10 14:11:50,513 - INFO - Magnetometer X:66.90, Y:105.15, Z:-79.20, Heading:311.19
@@ -60,6 +68,8 @@
 2025-09-10 14:11:54,544 - INFO - Magnetometer X:68.55, Y:105.00, Z:-79.05, Heading:316.15
 2025-09-10 14:11:55,048 - INFO - Magnetometer X:68.25, Y:105.30, Z:-79.35, Heading:316.19
 2025-09-10 14:11:55,553 - INFO - Magnetometer X:69.75, Y:106.20, Z:-79.35, Heading:323.45
+
+NORTH
 2025-09-10 14:11:56,057 - INFO - Magnetometer X:81.45, Y:112.20, Z:-80.40, Heading:355.03
 2025-09-10 14:11:56,561 - INFO - Magnetometer X:80.55, Y:113.10, Z:-79.35, Heading:357.21
 2025-09-10 14:11:57,065 - INFO - Magnetometer X:79.65, Y:112.95, Z:-77.70, Heading:356.67
