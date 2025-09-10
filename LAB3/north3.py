@@ -1,0 +1,60 @@
+import board
+import busio
+import digitalio
+import adafruit_icm20x
+
+# ---------- I2C + Sensor ----------
+i2c = board.I2C()
+icm = adafruit_icm20x.ICM20948(i2c, address=0x68)
+
+# ---------- LED (BCM pin D25) ----------
+red_led_pin = digitalio.DigitalInOut(board.D25)
+red_led_pin.direction = digitalio.Direction.OUTPUT
+red_led_pin.value = False
+
+def calculate_heading(mx, my):
+
+    # subtract offsets
+    mx -= 58.800
+    my -= 122.925
+
+    # heading in degrees (0..360), assuming sensor is held level
+    heading = math.degrees(math.atan2(my, mx))
+    if heading < 0:
+        heading += 360.0
+    return heading
+
+def is_north(heading_deg, threshold_deg=15):
+    return (heading_deg <= threshold_deg) or (heading_deg >= (360 - threshold_deg))
+
+def main():
+    try:
+        while True:
+            try:
+                mx, my, mz = icm.magnetic
+            except Exception:
+                # transient read issue; LED off until next good sample
+                red_led_pin.value = False
+                time.sleep(0.05)
+                continue
+
+            heading = calculate_heading(mx, my)
+
+            # Debug prints
+            print(f"Magnetometer X: {mx:.2f}, Y: {my:.2f}, Z: {mz:.2f}")
+            print(f"Heading: {heading:.2f} degrees")
+
+            # LED on if facing roughly North (  15  )
+            red_led_pin.value = is_north(heading, threshold_deg=15)
+            print("Facing North!  ^=^y^b LED ON" if red_led_pin.value else "Not North.  ^=^y^a LED OFF")
+            time.sleep(0.5)
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        red_led_pin.value = False
+
+if __name__ == "__main__":
+    main()
+
+
