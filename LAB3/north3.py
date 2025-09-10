@@ -16,10 +16,11 @@ red_led_pin.direction = digitalio.Direction.OUTPUT
 red_led_pin.value = False
 
 def calculate_heading(mx, my):
+    # MX_OFFSET=59.025, MY_OFFSET=114.150, MZ_OFFSET=-72.750
 
     # subtract offsets
-    mx -= 58.800
-    my -= 122.925
+    mx -= 59.025
+    my -= 114.150
 
     # heading in degrees (0..360), assuming sensor is held level
     heading = math.degrees(math.atan2(my, mx))
@@ -49,7 +50,7 @@ def main():
 
             # Configure logging once at program start
             logging.basicConfig(
-                filename="magnetometer.log",  # or None for console only
+                filename="magnetometer2.log",  # or None for console only
                 level=logging.INFO,
                 format="%(asctime)s - %(levelname)s - %(message)s"
             )
