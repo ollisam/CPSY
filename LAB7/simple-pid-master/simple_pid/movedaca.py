@@ -22,9 +22,9 @@ Notes:
 - Output limits are [0, 1] which maps to the motor speed value for each side.
 """
 
-# === CONFIG: GPIO PINS (CHANGE THESE TO MATCH YOUR HARDWARE) ===
-LEFT_MOTOR_PINS = ("GPIO19", "GPIO13")  # (forward, backward)
-RIGHT_MOTOR_PINS = ("GPIO18", "GPIO12")
+# === CONFIG: GPIO PINS  ===
+LEFT_MOTOR_PINS = ("GPIO13", "GPIO19")   # left IN1, IN2
+RIGHT_MOTOR_PINS = ("GPIO12", "GPIO18")  # right IN1, IN2
 
 LEFT_ENCODER_PINS = ("GPIO21", "GPIO20")  # (A, B)  <-- TODO: set correctly
 RIGHT_ENCODER_PINS = ("GPIO6", "GPIO16")   # (A, B)  <-- TODO: set correctly
