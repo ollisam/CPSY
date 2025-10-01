@@ -26,8 +26,8 @@ Notes:
 LEFT_MOTOR_PINS = ("GPIO13", "GPIO19")  # (forward, backward)
 RIGHT_MOTOR_PINS = ("GPIO18", "GPIO12")
 
-LEFT_ENCODER_PINS = ("GPIO23", "GPIO24")  # (A, B)  <-- TODO: set correctly
-RIGHT_ENCODER_PINS = ("GPIO5", "GPIO6")   # (A, B)  <-- TODO: set correctly
+LEFT_ENCODER_PINS = ("GPIO21", "GPIO20")  # (A, B)  <-- TODO: set correctly
+RIGHT_ENCODER_PINS = ("GPIO6", "GPIO16")   # (A, B)  <-- TODO: set correctly
 
 # === CONFIG: PID GAINS (TUNE THESE) ===
 KP = 0.02
