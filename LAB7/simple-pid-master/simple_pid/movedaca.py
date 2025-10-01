@@ -23,7 +23,7 @@ Notes:
 """
 
 # === CONFIG: GPIO PINS (CHANGE THESE TO MATCH YOUR HARDWARE) ===
-LEFT_MOTOR_PINS = ("GPIO13", "GPIO19")  # (forward, backward)
+LEFT_MOTOR_PINS = ("GPIO19", "GPIO13")  # (forward, backward)
 RIGHT_MOTOR_PINS = ("GPIO18", "GPIO12")
 
 LEFT_ENCODER_PINS = ("GPIO21", "GPIO20")  # (A, B)  <-- TODO: set correctly
