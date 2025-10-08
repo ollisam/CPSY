@@ -1,7 +1,7 @@
 # pid_calibrate.py  —  PID tuning tool for DRV8833 motors
 import time
 import curses
-from simple_pid import PID
+import PID
 from gpiozero import PWMOutputDevice, DigitalOutputDevice, RotaryEncoder
 
 # ===== DRV8833 PIN SETUP =====
