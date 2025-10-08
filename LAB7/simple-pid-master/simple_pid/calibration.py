@@ -1,7 +1,7 @@
 # pid_calibrate.py  —  PID tuning tool for DRV8833 motors
 import time
 import curses
-import PID
+import pid
 from gpiozero import PWMOutputDevice, DigitalOutputDevice, RotaryEncoder
 
 # ===== DRV8833 PIN SETUP =====
@@ -52,8 +52,8 @@ def main(stdscr):
     right_enc = RotaryEncoder(*RIGHT_ENCODER_PINS, max_steps=0)
 
     KP, KI, KD = 0.02, 0.00, 0.001
-    pidL = PID(KP, KI, KD, setpoint=0.0)
-    pidR = PID(KP, KI, KD, setpoint=0.0)
+    pidL = pid.PID(KP, KI, KD, setpoint=0.0)
+    pidR = pid.PID(KP, KI, KD, setpoint=0.0)
     for pidc in (pidL, pidR):
         pidc.sample_time = 1.0 / LOOP_HZ
         pidc.output_limits = (0.0, 1.0)
