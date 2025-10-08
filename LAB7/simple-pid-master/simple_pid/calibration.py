@@ -103,11 +103,18 @@ def main(stdscr):
                 pidL.setpoint = setpoint
                 pidR.setpoint = setpoint
 
-                l_out = pidL(l_cps)
-                r_out = pidR(r_cps)
+                # Feedforward: static + velocity term (units: duty)
+                base_ff = 0.0 if setpoint <= 0.0 else min(1.0, FF_KS + FF_KV * setpoint)
 
-                set_left(l_out)
-                set_right(r_out)
+                # PID on filtered cps; outputs are small trims around feedforward
+                l_trim = pidL(l_cps_f)
+                r_trim = pidR(r_cps_f)
+
+                l_cmd = apply_deadzone(base_ff + l_trim) if setpoint > 0.0 else 0.0
+                r_cmd = apply_deadzone(base_ff + r_trim) if setpoint > 0.0 else 0.0
+
+                set_left(l_cmd)
+                set_right(r_cmd)
             else:
                 stop_all()
 
