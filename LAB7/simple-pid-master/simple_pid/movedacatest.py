@@ -5,8 +5,8 @@ import pid
 from gpiozero import Motor, Robot, RotaryEncoder
 
 # === CONFIG: BCM pin numbers (ints) ===
-LEFT_MOTOR_PINS  = (13, 17)   # left: forward, backward
-RIGHT_MOTOR_PINS = (22, 18)   # right: forward, backward
+LEFT_MOTOR_PINS  = (22, 18)   # left: forward, backward
+RIGHT_MOTOR_PINS = (13, 17)   # right: forward, backward
 
 LEFT_ENCODER_PINS  = (20, 21)  # A, B
 RIGHT_ENCODER_PINS = (6, 16)   # A, B
@@ -16,7 +16,7 @@ ENCODER_SIGN_LEFT  = -1
 ENCODER_SIGN_RIGHT = -1
 
 # PID gains (tune on hardware)
-KP, KI, KD = 0.03, 0.03, 0.03   # start with KI=0 to avoid windup while testing
+KP, KI, KD = 0.014, 0.4, 0.01   # start with KI=0 to avoid windup while testing
 SETPOINT_STEP = 10.0             # cps per press of w/s
 TRIM_STEP = 3.0                  # cps per press of a/d
 LOOP_HZ = 25                     # control loop frequency (25 Hz ~ 40 ms)
