@@ -20,6 +20,7 @@ MIN_PWM   = 0.08    # minimum duty considered “real”; below this we send 0
 FF_KS     = 0.0     # static feedforward (disabled; use pure velocity FF)
 FF_KV     = 0.0008  # velocity feedforward per cps (tune to your encoder/drive)
 CPS_ALPHA = 0.3     # EMA filter for cps; higher = less smoothing
+TRIM_STEP = 3.0     # cps per press of a/d
 
 def apply_deadzone(u: float) -> float:
     """Clamp negatives to 0 and zero-out tiny positive commands instead of forcing a minimum.
@@ -97,6 +98,10 @@ def main(stdscr):
                     setpoint += 10
                 elif key == ord('s'):
                     setpoint = max(0.0, setpoint - 10)
+                elif key == ord('a'):
+                    trim -= TRIM_STEP
+                elif key == ord('d'):
+                    trim += TRIM_STEP
                 elif key == ord('1'):
                     KP *= 1.2
                 elif key == ord('2'):
