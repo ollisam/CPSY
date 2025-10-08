@@ -73,6 +73,7 @@ def main(stdscr):
 
     cruise = False
     setpoint = 0.0
+    trim = 0.0
 
     # step history for cps
     l_prev = safe_steps(left_enc)
