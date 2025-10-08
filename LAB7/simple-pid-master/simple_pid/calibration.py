@@ -71,7 +71,7 @@ def main(stdscr):
     pidR = pid.PID(KP, KI, KD, setpoint=0.0)
     for pidc in (pidL, pidR):
         pidc.sample_time = 1.0 / LOOP_HZ
-        pidc.output_limits = (-0.2, 0.2)  # keep trims small so FF dominates
+        pidc.output_limits = (-1, 1)  # keep trims small so FF dominates
 
     cruise = False
     setpoint = 0.0
