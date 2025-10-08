@@ -18,16 +18,18 @@ PWM_HZ = 1000
 LOOP_HZ = 50
 
 # ===== Control helpers =====
-MIN_PWM   = 0.18   # minimum duty to overcome static friction
-FF_KS     = 0.12   # static feedforward (approx. duty to just start turning)
+MIN_PWM   = 0.08   # minimum duty to overcome static friction
+FF_KS     = 0.0   # static feedforward (approx. duty to just start turning)
 FF_KV     = 0.0015 # velocity feedforward per cps (tune to your enc. scale)
 CPS_ALPHA = 0.3    # EMA filter for cps; higher = less smoothing
 
 def apply_deadzone(u):
-    """Map small positive commands to at least MIN_PWM; clamp negatives to 0."""
-    if u <= 0.0:
+    # Negative or tiny -> 0; allow real zero speed
+    if u <= 0.0: 
         return 0.0
-    return min(1.0, max(MIN_PWM, u))
+    if u < MIN_PWM:
+        return 0.0
+    return min(1.0, u)
 
 # ===== Motor helpers =====
 left_pwm  = PWMOutputDevice(LEFT_PWM, frequency=PWM_HZ, initial_value=0.0)
