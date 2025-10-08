@@ -67,12 +67,12 @@ def main(stdscr):
     left_enc  = RotaryEncoder(*LEFT_ENCODER_PINS, max_steps=0)
     right_enc = RotaryEncoder(*RIGHT_ENCODER_PINS, max_steps=0)
 
-    KP, KI, KD = 0.05, 0.00, 0.002
+    KP, KI, KD = 0.0010, 0.0000, 0.0005
     pidL = pid.PID(KP, KI, KD, setpoint=0.0)
     pidR = pid.PID(KP, KI, KD, setpoint=0.0)
     for pidc in (pidL, pidR):
         pidc.sample_time = 1.0 / LOOP_HZ
-        pidc.output_limits = (-1, 1)  # PID trims around feedforward; narrower to avoid hunting
+        pidc.output_limits = (-0.2, 0.2)  # small trims only; prevents jumping to max speed
 
     cruise = False
     setpoint = 0.0
@@ -132,12 +132,14 @@ def main(stdscr):
                 # Purely velocity-based feedforward
                 base_ff = 0.0 if setpoint <= 0 else min(1.0, FF_KV * setpoint)
 
-                # PID on filtered cps; outputs are small trims around feedforward
                 l_trim = pidL(l_cps_f)
                 r_trim = pidR(r_cps_f)
 
-                l_cmd = apply_deadzone(base_ff + l_trim) if setpoint > 0.0 else 0.0
-                r_cmd = apply_deadzone(base_ff + r_trim) if setpoint > 0.0 else 0.0
+                raw_l = base_ff + l_trim
+                raw_r = base_ff + r_trim
+
+                l_cmd = apply_deadzone(raw_l) if setpoint > 0.0 else 0.0
+                r_cmd = apply_deadzone(raw_r) if setpoint > 0.0 else 0.0
 
                 set_left(l_cmd)
                 set_right(r_cmd)
@@ -150,6 +152,7 @@ def main(stdscr):
             stdscr.addstr(2, 2, f"Kp={KP:.4f}  Ki={KI:.4f}  Kd={KD:.4f}")
             stdscr.addstr(3, 2, f"L cps={l_cps_f:7.1f} out={left_pwm.value:5.2f}")
             stdscr.addstr(4, 2, f"R cps={r_cps_f:7.1f} out={right_pwm.value:5.2f}")
+            stdscr.addstr(5, 2, f"FF={base_ff:4.2f} Ltrim={l_trim:5.2f} Rtrim={r_trim:5.2f} rawL={raw_l:5.2f} rawR={raw_r:5.2f}")
             stdscr.refresh()
             time.sleep(1.0 / LOOP_HZ)
     finally:
