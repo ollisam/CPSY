@@ -18,10 +18,10 @@ LOOP_HZ = 50
 # ===== Control helpers =====
 MIN_PWM   = 0.08    # minimum duty considered “real”; below this we send 0
 FF_KS     = 0.0     # static feedforward (disabled; use pure velocity FF)
-FF_KV     = 0.0008  # velocity feedforward per cps (tune to your encoder/drive)
+FF_KV     = 0.003  # velocity feedforward per cps (tune to your encoder/drive)
 CPS_ALPHA = 0.3     # EMA filter for cps; higher = less smoothing
 
-TRIM_STEP   = 0.10   # steering step per keypress
+TRIM_STEP   = 0.25   # steering step per keypress
 STEER_LIMIT = 1.0    # clamp |steer| ≤ 1
 
 def apply_deadzone(u: float) -> float:
