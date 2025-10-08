@@ -20,7 +20,7 @@ LOOP_HZ = 50
 # ===== Control helpers =====
 MIN_PWM   = 0.08   # minimum duty to overcome static friction
 FF_KS     = 0.0   # static feedforward (approx. duty to just start turning)
-FF_KV     = 0.008 # velocity feedforward per cps (tune to your enc. scale)
+FF_KV     = 0.0008 # velocity feedforward per cps (tune to your enc. scale)
 CPS_ALPHA = 0.3    # EMA filter for cps; higher = less smoothing
 
 def apply_deadzone(u):
