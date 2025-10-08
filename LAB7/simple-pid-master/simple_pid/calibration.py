@@ -20,7 +20,7 @@ LOOP_HZ = 50
 # ===== Control helpers =====
 MIN_PWM   = 0.08   # minimum duty to overcome static friction
 FF_KS     = 0.0   # static feedforward (approx. duty to just start turning)
-FF_KV     = 0.0015 # velocity feedforward per cps (tune to your enc. scale)
+FF_KV     = 0.008 # velocity feedforward per cps (tune to your enc. scale)
 CPS_ALPHA = 0.3    # EMA filter for cps; higher = less smoothing
 
 def apply_deadzone(u):
@@ -72,7 +72,7 @@ def main(stdscr):
     pidR = pid.PID(KP, KI, KD, setpoint=0.0)
     for pidc in (pidL, pidR):
         pidc.sample_time = 1.0 / LOOP_HZ
-        pidc.output_limits = (-0.5, 0.5)  # PID trims around feedforward; narrower to avoid hunting
+        pidc.output_limits = (-1, 1)  # PID trims around feedforward; narrower to avoid hunting
 
     cruise = False
     setpoint = 0.0
@@ -112,9 +112,15 @@ def main(stdscr):
                 pidR.tunings = (KP, KI, KD)
 
             # measure cps
-            l_cps, l_prev, now = cps(l_prev, t_prev, left_enc)
-            r_cps, r_prev, now = cps(r_prev, t_prev, right_enc)
+
+            now = time.time()
+            l_cps, l_prev = (safe_steps(left_enc) - l_prev) / (now - t_prev), safe_steps(left_enc)
+            r_cps, r_prev = (safe_steps(right_enc) - r_prev) / (now - t_prev), safe_steps(right_enc)
             t_prev = now
+
+            # l_cps, l_prev, now = cps(l_prev, t_prev, left_enc)
+            # r_cps, r_prev, now = cps(r_prev, t_prev, right_enc)
+            # t_prev = now
             # Exponential moving average to reduce encoder noise / quantization
             l_cps_f = (1.0 - CPS_ALPHA) * l_cps_f + CPS_ALPHA * l_cps
             r_cps_f = (1.0 - CPS_ALPHA) * r_cps_f + CPS_ALPHA * r_cps
@@ -123,8 +129,8 @@ def main(stdscr):
                 pidL.setpoint = setpoint
                 pidR.setpoint = setpoint
 
-                # Feedforward: static + velocity term (units: duty)
-                base_ff = 0.0 if setpoint <= 0.0 else min(1.0, FF_KS + FF_KV * setpoint)
+                # Purely velocity-based feedforward
+                base_ff = 0.0 if setpoint <= 0 else min(1.0, FF_KV * setpoint)
 
                 # PID on filtered cps; outputs are small trims around feedforward
                 l_trim = pidL(l_cps_f)
