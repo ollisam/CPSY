@@ -160,8 +160,8 @@ def main(stdscr):
                 raw_r = base_ff_r + r_trim
 
                 # Deadzone zeros tiny outputs; allows true low speeds
-                l_cmd = apply_deadzone(raw_l) if l_sp > 0.0 else 0.0
-                r_cmd = apply_deadzone(raw_r) if r_sp > 0.0 else 0.0
+                l_cmd = raw_l if l_sp > 0.0 else 0.0
+                r_cmd = raw_r if r_sp > 0.0 else 0.0
 
                 set_left(l_cmd)
                 set_right(r_cmd)
