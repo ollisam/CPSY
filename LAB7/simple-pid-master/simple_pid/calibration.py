@@ -172,7 +172,7 @@ def main(stdscr):
             stdscr.addstr(0, 2, "q=quit p=PID w/s=setpoint a/d=steer± c=center 1/2=Kp 3/4=Ki 5/6=Kd")
             stdscr.addstr(1, 2, f"PID: {'ON ' if cruise else 'OFF'}  setpoint={setpoint:6.1f}  steer={steer:+.2f}")
             stdscr.addstr(2, 2, f"Kp={KP:.4f}  Ki={KI:.4f}  Kd={KD:.4f}")
-            stdscr.addstr(3, 2, f"L cps={l_cps_f:7.1f} out={left_pwm.value:5.2f}")
+            stdscr.addstr(3, 2, f"L cps={l_cps:7.1f} (f={l_cps_f:7.1f}) out={left_pwm.value:5.2f}")
             stdscr.addstr(4, 2, f"R cps={r_cps_f:7.1f} out={right_pwm.value:5.2f}")
             # Feedforward and trims to diagnose saturation/overpower
             try:
