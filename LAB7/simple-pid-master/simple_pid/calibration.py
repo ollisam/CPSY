@@ -51,7 +51,7 @@ def main(stdscr):
     left_enc  = RotaryEncoder(*LEFT_ENCODER_PINS, max_steps=0)
     right_enc = RotaryEncoder(*RIGHT_ENCODER_PINS, max_steps=0)
 
-    KP, KI, KD = 0.02, 0.00, 0.001
+    KP, KI, KD = 0.02, 0.01, 0.001
     pidL = pid.PID(KP, KI, KD, setpoint=0.0)
     pidR = pid.PID(KP, KI, KD, setpoint=0.0)
     for pidc in (pidL, pidR):
