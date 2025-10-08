@@ -7,7 +7,7 @@ from gpiozero import PWMOutputDevice, DigitalOutputDevice, RotaryEncoder
 # ===== DRV8833 PIN SETUP =====
 LEFT_PWM = 13    # AIN1 (PWM)
 LEFT_DIR = 17    # AIN2 (digital)
-RIGHT_PWM = 19   # BIN1 (PWM)
+RIGHT_PWM = 18   # BIN1 (PWM)
 RIGHT_DIR = 22   # BIN2 (digital)
 LEFT_ENCODER_PINS  = (20, 21)
 RIGHT_ENCODER_PINS = (6, 16)
