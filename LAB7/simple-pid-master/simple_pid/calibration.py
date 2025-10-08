@@ -66,7 +66,7 @@ def main(stdscr):
     right_enc = RotaryEncoder(*RIGHT_ENCODER_PINS, max_steps=0)
 
     # Small trims only; start conservative to avoid blasting to max speed
-    KP, KI, KD = 0.0010, 0.0000, 0.0005
+    KP, KI, KD = 0.01, 0.0000, 0.0000
     pidL = pid.PID(KP, KI, KD, setpoint=0.0)
     pidR = pid.PID(KP, KI, KD, setpoint=0.0)
     for pidc in (pidL, pidR):
