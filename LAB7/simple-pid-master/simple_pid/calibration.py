@@ -15,7 +15,19 @@ RIGHT_ENCODER_PINS = (6, 16)
 
 
 PWM_HZ = 1000
-LOOP_HZ = 25
+LOOP_HZ = 50
+
+# ===== Control helpers =====
+MIN_PWM   = 0.18   # minimum duty to overcome static friction
+FF_KS     = 0.12   # static feedforward (approx. duty to just start turning)
+FF_KV     = 0.0015 # velocity feedforward per cps (tune to your enc. scale)
+CPS_ALPHA = 0.3    # EMA filter for cps; higher = less smoothing
+
+def apply_deadzone(u):
+    """Map small positive commands to at least MIN_PWM; clamp negatives to 0."""
+    if u <= 0.0:
+        return 0.0
+    return min(1.0, max(MIN_PWM, u))
 
 # ===== Motor helpers =====
 left_pwm  = PWMOutputDevice(LEFT_PWM, frequency=PWM_HZ, initial_value=0.0)
@@ -53,17 +65,19 @@ def main(stdscr):
     left_enc  = RotaryEncoder(*LEFT_ENCODER_PINS, max_steps=0)
     right_enc = RotaryEncoder(*RIGHT_ENCODER_PINS, max_steps=0)
 
-    KP, KI, KD = 0.02, 0.01, 0.001
+    KP, KI, KD = 0.05, 0.00, 0.002
     pidL = pid.PID(KP, KI, KD, setpoint=0.0)
     pidR = pid.PID(KP, KI, KD, setpoint=0.0)
     for pidc in (pidL, pidR):
         pidc.sample_time = 1.0 / LOOP_HZ
-        pidc.output_limits = (0.0, 1.0)
+        pidc.output_limits = (-0.5, 0.5)  # PID trims around feedforward; narrower to avoid hunting
 
     cruise = False
     setpoint = 0.0
     l_prev, r_prev = safe_steps(left_enc), safe_steps(right_enc)
     t_prev = time.time()
+
+    l_cps_f, r_cps_f = 0.0, 0.0
 
     try:
         while True:
@@ -73,6 +87,7 @@ def main(stdscr):
                 elif key == ord('p'):
                     cruise = not cruise
                     pidL.reset(); pidR.reset()
+                    l_cps_f, r_cps_f = 0.0, 0.0
                     if not cruise: stop_all()
                 elif key == ord('w'):
                     setpoint += 10
@@ -98,6 +113,9 @@ def main(stdscr):
             l_cps, l_prev, now = cps(l_prev, t_prev, left_enc)
             r_cps, r_prev, now = cps(r_prev, t_prev, right_enc)
             t_prev = now
+            # Exponential moving average to reduce encoder noise / quantization
+            l_cps_f = (1.0 - CPS_ALPHA) * l_cps_f + CPS_ALPHA * l_cps
+            r_cps_f = (1.0 - CPS_ALPHA) * r_cps_f + CPS_ALPHA * r_cps
 
             if cruise:
                 pidL.setpoint = setpoint
@@ -122,8 +140,8 @@ def main(stdscr):
             stdscr.addstr(0, 2, "q=quit p=PID w/s=setpoint 1/2=Kp 3/4=Ki 5/6=Kd")
             stdscr.addstr(1, 2, f"PID: {'ON ' if cruise else 'OFF'}  setpoint={setpoint:6.1f}")
             stdscr.addstr(2, 2, f"Kp={KP:.4f}  Ki={KI:.4f}  Kd={KD:.4f}")
-            stdscr.addstr(3, 2, f"L cps={l_cps:7.1f} out={left_pwm.value:5.2f}")
-            stdscr.addstr(4, 2, f"R cps={r_cps:7.1f} out={right_pwm.value:5.2f}")
+            stdscr.addstr(3, 2, f"L cps={l_cps_f:7.1f} out={left_pwm.value:5.2f}")
+            stdscr.addstr(4, 2, f"R cps={r_cps_f:7.1f} out={right_pwm.value:5.2f}")
             stdscr.refresh()
             time.sleep(1.0 / LOOP_HZ)
     finally:
