@@ -16,7 +16,7 @@ ENCODER_SIGN_LEFT  = -1
 ENCODER_SIGN_RIGHT = -1
 
 # PID gains (tune on hardware)
-KP, KI, KD = 0.014, 0.4, 0.01   # start with KI=0 to avoid windup while testing
+KP, KI, KD = 0.0139, 0.3834, 0.0107   # start with KI=0 to avoid windup while testing
 SETPOINT_STEP = 10.0             # cps per press of w/s
 TRIM_STEP = 3.0                  # cps per press of a/d
 LOOP_HZ = 25                     # control loop frequency (25 Hz ~ 40 ms)
