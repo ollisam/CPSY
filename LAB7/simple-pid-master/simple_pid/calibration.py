@@ -38,12 +38,20 @@ right_pwm = PWMOutputDevice(RIGHT_PWM, frequency=PWM_HZ, initial_value=0.0)
 right_dir = DigitalOutputDevice(RIGHT_DIR, initial_value=False)
 
 def set_left(v: float):
-    left_dir.off()  # forward
-    left_pwm.value = max(0.0, min(1.0, v))
+    if v >= 0:
+        left_dir.off()  # forward
+        left_pwm.value = min(1.0, v)
+    else:
+        left_dir.on()  # reverse
+        left_pwm.value = min(1.0, -v)
 
 def set_right(v: float):
-    right_dir.off()  # forward
-    right_pwm.value = max(0.0, min(1.0, v))
+    if v >= 0:
+        right_dir.off()  # forward
+        right_pwm.value = min(1.0, v)
+    else:
+        right_dir.on()  # reverse
+        right_pwm.value = min(1.0, -v)
 
 def stop_all():
     set_left(0.0)
@@ -100,9 +108,13 @@ def main(stdscr):
                 elif key == ord('s'):
                     setpoint = max(0.0, setpoint - 10)
                 elif key == ord('a'):
-                    trim -= TRIM_STEP
+                    set_left(0.3)
+                    set_right(-0.3)
+                    cruise = False
                 elif key == ord('d'):
-                    trim += TRIM_STEP
+                    set_left(-0.3)
+                    set_right(0.3)
+                    cruise = False
                 elif key == ord('1'):
                     KP *= 1.2
                 elif key == ord('2'):
