@@ -63,8 +63,6 @@ def main():
             # If already moving forward and we get too close: hard stop
             if moving_forward and too_close(last_voltage):
                 direction = ord('s')
-                time.sleep(0.001)
-                direction = -1
                 robot.stop()
                 moving_forward = False
                 stdscr.addstr(1, 10, f"STOP: obstacle! V={last_voltage:0.2f}V      ")
