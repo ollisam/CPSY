@@ -42,7 +42,7 @@ def main():
     stdscr.nodelay(1)
 
     stdscr.addstr(0, 2, "WASD to drive, 'e' stop, 'q' quit")
-    stdscr.addstr(1, 2, "Failsafe: blocks/halts FORWARD if obstacle <~25 cm")
+    stdscr.addstr(1, 2, "Failsafe: STOP")
 
     moving_forward = False
     last_voltage = 0.0
@@ -80,25 +80,25 @@ def main():
                 else:
                     robot.forward()
                     moving_forward = True
-                    stdscr.addstr(1, 10, "Forward    ")
+                    stdscr.addstr(1, 10, "Forward               ")
 
             if direction == ord('s'):
                 robot.backward()
                 moving_forward = False
-                stdscr.addstr(1, 10, "Backward    ")
+                stdscr.addstr(1, 10, "Backward              ")
 
             if direction == ord('a'):
                 robot.left()
                 moving_forward = False
-                stdscr.addstr(1, 10, "Left   ")
+                stdscr.addstr(1, 10, "Left              ")
 
             if direction == ord('d'):
                 robot.right()
                 moving_forward = False
-                stdscr.addstr(1, 10, "Right    ")
+                stdscr.addstr(1, 10, "Right             ")
 
             # Display voltage
-            time.sleep(0.04)
+            time.sleep(0.025)
 
     finally:
         # Important to set everthing back by end of the script
