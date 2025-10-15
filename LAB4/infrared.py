@@ -9,7 +9,7 @@ from adafruit_mcp3xxx.analog_in import AnalogIn
 spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
 
 # Use the hardware chip select CE0 (pin 24 on Pi header, SPI0 CE0)
-cs = digitalio.DigitalInOut(board.CE0)
+cs = digitalio.DigitalInOut(board.CE05)
 
 # Create the MCP3008 object
 mcp = MCP.MCP3008(spi, cs)
@@ -21,4 +21,4 @@ chan0 = AnalogIn(mcp, MCP.P0)
 while True:
     print("Raw ADC Value: ", chan0.value)
     print(f"ADC Voltage: {chan0.voltage:.3f} V")
-    time.sleep(3)
+    time.sleep(2)
