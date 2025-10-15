@@ -24,7 +24,7 @@ def build_robot():
 def build_ir_channel():
     # SPI + MCP3008 channel 0
     spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
-    cs = digitalio.DigitalInOut(board.D8)  # CE0 (GPIO8)
+    cs = digitalio.DigitalInOut(board.D5)  # GPIO5
     mcp = MCP.MCP3008(spi, cs)
     return AnalogIn(mcp, MCP.P0)
 
@@ -46,6 +46,7 @@ def main():
 
     moving_forward = False
     last_voltage = 0.0
+    direction = -1 # no key pressed
 
     try:
         while direction != ord('q'):
@@ -94,7 +95,6 @@ def main():
                 stdscr.addstr(1, 10, "Right    ")
 
             # Display voltage
-            print(f"Current voltage: {chan0.voltage:.3f} V")
             time.sleep(0.04)
 
     finally:
