@@ -12,7 +12,7 @@ import adafruit_mcp3xxx.mcp3008 as MCP
 from adafruit_mcp3xxx.analog_in import AnalogIn
 
 # --- CONFIG ---
-NEAR_VOLTAGE = 2.3      # volts considered "too close" (~20 cm)
+NEAR_VOLTAGE = 2.2      # volts considered "too close" (~20 cm)
 SAMPLE_INTERVAL = 0.05  # seconds between sensor reads (50 ms)
 
 def build_robot():
