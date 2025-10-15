@@ -12,7 +12,7 @@ import adafruit_mcp3xxx.mcp3008 as MCP
 from adafruit_mcp3xxx.analog_in import AnalogIn
 
 # --- CONFIG ---
-NEAR_VOLTAGE = 2.0      # volts considered "too close" (~20 cm)
+NEAR_VOLTAGE = 2.3      # volts considered "too close" (~20 cm)
 SAMPLE_INTERVAL = 0.05  # seconds between sensor reads (50 ms)
 
 def build_robot():
@@ -24,7 +24,7 @@ def build_robot():
 def build_ir_channel():
     # SPI + MCP3008 channel 0
     spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
-    cs = digitalio.DigitalInOut(board.GPIO8)  # CE0 (GPIO8)
+    cs = digitalio.DigitalInOut(board.D8)  # CE0 (GPIO8)
     mcp = MCP.MCP3008(spi, cs)
     return AnalogIn(mcp, MCP.P0)
 
