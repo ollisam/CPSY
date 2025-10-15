@@ -53,9 +53,12 @@ def main():
 
             stdscr.refresh()
             direction = stdscr.getch()
-
             # --- Sensor handling ---
             last_voltage = chan0.voltage
+
+            if not too_close(last_voltage):
+                direction = ord('w')
+                moving_forward = True
 
             # If already moving forward and we get too close: hard stop
             if moving_forward and too_close(last_voltage):
