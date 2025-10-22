@@ -33,7 +33,7 @@ BACKUP_TIME = 0.35                  # s: reverse if blocked
 EVADE_TURN_TIME = 0.35              # s: turn after reversing
 
 # Drive
-BASE_SPEED = 0.2                   # 0..1 (tune for your bot)
+BASE_SPEED = 0.1                   # 0..1 (tune for your bot)
 TURN_GAIN = 0.35                    # scales how hard to turn on color bias
 MIN_STEER = 0.10                    # deadband: ignore very small biases
 MAX_STEER = 0.6                     # clamp
