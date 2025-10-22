@@ -34,8 +34,8 @@ EVADE_TURN_TIME = 0.35              # s: turn after reversing
 
 # Drive
 BASE_SPEED = 0.15                # 0..1 (tune for your bot)
-TURN_GAIN = 0.25                    # scales how hard to turn on color bias
-MIN_STEER = 0.10                    # deadband: ignore very small biases
+TURN_GAIN = 0.10                    # scales how hard to turn on color bias
+MIN_STEER = 0.05                    # deadband: ignore very small biases
 MAX_STEER = 0.6                     # clamp
 
 # Color classification thresholds (on 0..255 gamma-corrected bytes)
@@ -72,8 +72,8 @@ def build_oled_and_color():
 
     # TCS34725 Color sensor
     tcs = adafruit_tcs34725.TCS34725(i2c)   # default 0x29
-    tcs.integration_time = 200              # ms
-    tcs.gain = 60                          # 1, 4, 16, 60
+    tcs.integration_time = 600              # ms
+    tcs.gain = 16                          # 1, 4, 16, 60
     return oled, tcs
 
 # =========================
