@@ -39,9 +39,9 @@ MIN_STEER = 0.10                    # deadband: ignore very small biases
 MAX_STEER = 0.6                     # clamp
 
 # Color classification thresholds (on 0..255 gamma-corrected bytes)
-GREEN_MIN = 60                      # require at least this much green to consider "green"
-RED_MIN   = 60
-DOMINANCE_MARGIN = 25               # G must exceed R by this (or R exceed G) to "win"
+GREEN_MIN = 40                      # require at least this much green to consider "green"
+RED_MIN   = 40
+DOMINANCE_MARGIN = 20               # G must exceed R by this (or R exceed G) to "win"
 BLUE_SUPPRESS = 30                  # optional: if blue is high, ignore (helps on cyan/white)
 
 # Safety / smoothing
