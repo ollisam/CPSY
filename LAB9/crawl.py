@@ -18,7 +18,7 @@ tcs.integration_time = 50  # ms
 tcs.gain = 4
 
 # ===== Tunables =====
-CRAWL_SPEED   = 0.30   # steady crawl speed when not nudging (0..1)
+CRAWL_SPEED   = 0.25   # steady crawl speed when not nudging (0..1)
 NUDGE_SPEED   = 0.25   # speed for the single-wheel nudge (0..1)
 NUDGE_TIME    = 0.20   # seconds to spin the selected wheel
 COOLDOWN      = 0.25   # minimum time between nudge triggers (debounce)
