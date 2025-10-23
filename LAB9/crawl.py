@@ -20,7 +20,7 @@ tcs.gain = 4
 # ===== Tunables =====
 CRAWL_SPEED   = 0.15   # steady crawl speed when not nudging (0..1)
 NUDGE_SPEED   = 0.25   # speed for the single-wheel nudge (0..1)
-NUDGE_TIME    = 0.40   # seconds to spin the selected wheel
+NUDGE_TIME    = 1   # seconds to spin the selected wheel
 COOLDOWN      = 0.30   # minimum time between nudge triggers (debounce)
 SAMPLE_DT     = 0.02   # sensor poll interval
 
