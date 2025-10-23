@@ -26,7 +26,7 @@ tcs.integration_time = 50   # ms
 tcs.gain = 4
 
 # Speed settings
-FORWARD_SPEED = 0.15
+FORWARD_SPEED = 0.2
 TURN_SPEED    = 0.20
 
 # Timing / thresholds
