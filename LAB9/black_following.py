@@ -18,8 +18,8 @@ tcs.integration_time = 50   # ms
 tcs.gain = 4
 
 # Speed settings
-FORWARD_SPEED = 0.35
-TURN_SPEED    = 0.30
+FORWARD_SPEED = 0.15
+TURN_SPEED    = 0.10
 
 # Timing / thresholds
 SAMPLE_DT     = 0.02
