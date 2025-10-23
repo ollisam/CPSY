@@ -18,9 +18,9 @@ sensor.integration_time = 24  # ms (lower = faster updates)
 sensor.gain = 4               # 1, 4, 16, 60 (adjust if needed)
 
 # --- Tunables ---
-BASE_SPEED = 0.2      # 0..1 forward speed
+BASE_SPEED = 0.15      # 0..1 forward speed
 K_STEER = 0.8         # steering gain; raise if it drifts, lower if too twitchy
-MIN_SPEED = 0.15      # keep motors from stalling on turns
+MIN_SPEED = 0.1      # keep motors from stalling on turns
 SAMPLE_DT = 0.02      # loop delay, ~50 Hz control
 
 def clamp(x, lo, hi):
