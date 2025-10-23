@@ -78,11 +78,11 @@ def main():
 
             # Choose direction based on sweep_left
             if sweep_left:
-                # forward-left arc: left wheel = inner, right wheel = outer
-                robot.forward((inner, outer))
+                # gpiozero: use robot.value=(left,right) for independent wheel speeds; forward() doesn't accept a tuple.
+                robot.value = (inner, outer)
             else:
                 # forward-right arc: left wheel = outer, right wheel = inner
-                robot.forward((outer, inner))
+                robot.value = (outer, inner)
 
             end_time = time.monotonic() + sweep_len
             while time.monotonic() < end_time:
