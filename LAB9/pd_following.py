@@ -13,7 +13,7 @@ tcs.integration_time = 50
 tcs.gain = 4
 
 # ---- Tunables ----
-BASE_SPEED = 0.20     # forward crawl
+BASE_SPEED = 0.15     # forward crawl
 Kp         = 1.0      # proportional on reflectance error
 Kd         = 0.25     # derivative dampening
 MAX_TURN   = 0.6      # cap on steering effort
