@@ -18,7 +18,7 @@ sensor.integration_time = 24  # ms (lower = faster updates)
 sensor.gain = 4               # 1, 4, 16, 60 (adjust if needed)
 
 # --- Tunables ---
-BASE_SPEED = 0.5      # 0..1 forward speed
+BASE_SPEED = 0.2      # 0..1 forward speed
 K_STEER = 0.8         # steering gain; raise if it drifts, lower if too twitchy
 MIN_SPEED = 0.15      # keep motors from stalling on turns
 SAMPLE_DT = 0.02      # loop delay, ~50 Hz control
@@ -43,10 +43,10 @@ def calibrate_white_level(duration=1.0):
 
 def main():
     print("Calibrating on light background...")
-    white_level = calibrate_white_level(1.0)
+    # white_level = calibrate_white_level(1.0)
     # Consider anything 30% darker than 'white' as the line
-    threshold = white_level * 0.7
-    print(f"White level ~ {white_level:.1f}, threshold ~ {threshold:.1f}")
+    threshold = 2674.3
+    # print(f"White level ~ {white_level:.1f}, threshold ~ {threshold:.1f}")
     print("Following line. Press Ctrl+C to stop.")
 
     # simple low-pass on intensity to reduce jitter
