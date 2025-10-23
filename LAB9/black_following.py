@@ -24,9 +24,15 @@ TURN_SPEED    = 0.15
 # Timing / thresholds
 SAMPLE_DT     = 0.02
 LOST_AFTER    = 0.15
+
 SWEEP_START   = 0.10
 SWEEP_STEP    = 0.05
 SWEEP_MAX     = 0.50
+
+# Search behavior tuning
+BACKUP_SPEED  = 0.15   # speed while backing up during search
+BACKUP_TIME   = 0.15   # seconds to back up after each arc sweep when not found
+ARC_BIAS      = 0.5    # 0..1, how much slower the inner wheel is during arc (higher => tighter turn)
 
 # ---- Sensor helpers ----
 def read_brightness():
@@ -62,16 +68,23 @@ def main():
                 time.sleep(SAMPLE_DT)
                 continue
 
-            # Lost line → begin zig-zag search
+            # Lost line → begin zig-zag search (arc + backup pattern)
             robot.stop()
             found = False
 
-            end_time = now + sweep_len
-            if sweep_left:
-                robot.left(TURN_SPEED)
-            else:
-                robot.right(TURN_SPEED)
+            # compute arc speeds: inner wheel slower by ARC_BIAS
+            inner = max(0.0, TURN_SPEED * (1.0 - ARC_BIAS))
+            outer = TURN_SPEED
 
+            # Choose direction based on sweep_left
+            if sweep_left:
+                # forward-left arc: left wheel = inner, right wheel = outer
+                robot.forward((inner, outer))
+            else:
+                # forward-right arc: left wheel = outer, right wheel = inner
+                robot.forward((outer, inner))
+
+            end_time = time.monotonic() + sweep_len
             while time.monotonic() < end_time:
                 if is_black(read_brightness(), threshold):
                     found = True
@@ -81,11 +94,17 @@ def main():
             robot.stop()
 
             if found:
+                # Reacquired: drive ahead briefly to re-center and reset sweep
                 robot.forward(FORWARD_SPEED)
                 last_seen = time.monotonic()
                 sweep_len = SWEEP_START
                 time.sleep(0.08)
             else:
+                # Not found: back up a little to avoid drifting off course, then try the other side
+                robot.backward(BACKUP_SPEED)
+                time.sleep(BACKUP_TIME)
+                robot.stop()
+
                 sweep_left = not sweep_left
                 sweep_len = min(SWEEP_MAX, sweep_len + SWEEP_STEP)
                 time.sleep(0.03)
