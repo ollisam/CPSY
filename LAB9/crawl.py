@@ -75,11 +75,6 @@ def main():
     # Next nudge direction: True → right wheel, False → left wheel
     nudge_right_next = True
 
-    # Only one wheel should ever spin at a time
-    active_right = True  # current crawl side: True => right wheel spinning
-    robot.right_motor.forward(CRAWL_SPEED)
-    robot.left_motor.stop()
-
     last_trigger = 0.0
 
     try:
@@ -99,37 +94,28 @@ def main():
             now = time.monotonic()
 
             if crossed and (now - last_trigger) >= COOLDOWN:
-                # Perform single-wheel nudge and keep only that wheel moving afterward
+                # Perform single-wheel nudge
                 if nudge_right_next:
                     # Right wheel nudges forward, left stopped
                     robot.left_motor.stop()
                     robot.right_motor.forward(NUDGE_SPEED)
-                    time.sleep(NUDGE_TIME)
-                    # Continue crawling with only the right wheel
-                    robot.right_motor.forward(CRAWL_SPEED)
-                    robot.left_motor.stop()
-                    active_right = True
                 else:
                     # Left wheel nudges forward, right stopped
                     robot.right_motor.stop()
                     robot.left_motor.forward(NUDGE_SPEED)
-                    time.sleep(NUDGE_TIME)
-                    # Continue crawling with only the left wheel
-                    robot.left_motor.forward(CRAWL_SPEED)
-                    robot.right_motor.stop()
-                    active_right = False
+
+                time.sleep(NUDGE_TIME)
+                robot.stop()
 
                 # Alternate for next crossing
                 nudge_right_next = not nudge_right_next
                 last_trigger = now
+
+                # After nudge, resume crawl
+                robot.forward(CRAWL_SPEED)
             else:
-                # No crossing: keep crawling with only one wheel spinning
-                if active_right:
-                    robot.right_motor.forward(CRAWL_SPEED)
-                    robot.left_motor.stop()
-                else:
-                    robot.left_motor.forward(CRAWL_SPEED)
-                    robot.right_motor.stop()
+                # No crossing: keep crawling forward slowly
+                robot.forward(CRAWL_SPEED)
 
             time.sleep(SAMPLE_DT)
 
