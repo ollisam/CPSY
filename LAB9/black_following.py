@@ -31,7 +31,7 @@ SWEEP_MAX     = 0.50
 
 # Search behavior tuning
 BACKUP_SPEED  = 0.20   # speed while backing up during search
-BACKUP_TIME   = 0.23   # seconds to back up after each arc sweep when not found
+BACKUP_TIME   = 0.22   # seconds to back up after each arc sweep when not found
 ARC_BIAS      = 0.5    # 0..1, how much slower the inner wheel is during arc (higher => tighter turn)
 
 # ---- Sensor helpers ----
