@@ -26,7 +26,7 @@ SAMPLE_DT     = 0.02
 LOST_AFTER    = 0.15
 
 SWEEP_START   = 0.10
-SWEEP_STEP    = 0.10
+SWEEP_STEP    = 0.15
 SWEEP_MAX     = 0.50
 
 # Search behavior tuning
