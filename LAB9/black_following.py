@@ -33,29 +33,12 @@ def read_brightness():
     _, _, _, clear = tcs.color_raw
     return float(clear)
 
-def calibrate_threshold():
-    print("\nCalibration: place sensor over WHITE area, press Enter.")
-    input()
-    white_samples = [read_brightness() for _ in range(30)]
-    white = sum(white_samples) / len(white_samples)
-    print(f"White level: {white:.1f}")
-
-    print("Now place sensor over BLACK line, press Enter.")
-    input()
-    black_samples = [read_brightness() for _ in range(30)]
-    black = sum(black_samples) / len(black_samples)
-    print(f"Black level: {black:.1f}")
-
-    thr = black + (white - black) * 0.35  # bias toward dark
-    print(f"Threshold: {thr:.1f}")
-    return thr
-
 def is_black(value, threshold):
     return value <= threshold
 
 # ---- Main loop ----
 def main():
-    threshold = calibrate_threshold()
+    threshold = 3000
     print("Starting line following... (Ctrl+C to stop)")
 
     last_seen = time.monotonic()
