@@ -19,7 +19,7 @@ tcs.gain = 4
 
 # Speed settings
 FORWARD_SPEED = 0.15
-TURN_SPEED    = 0.15
+TURN_SPEED    = 0.2
 
 # Timing / thresholds
 SAMPLE_DT     = 0.02
