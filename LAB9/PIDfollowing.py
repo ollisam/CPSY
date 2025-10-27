@@ -56,7 +56,7 @@ def clamp(x, lo, hi):
 
 def pwm_to_robot_speed(pwm_value):
     pwm_value = clamp(pwm_value, 0, 255)
-    pwm_value = (pwm_value / 255.0) * 0.14
+    pwm_value = (pwm_value / 255.0) * 0.13
     return pwm_value
 
 def set_motors(left_pwm_signed, right_pwm_signed):
@@ -136,6 +136,8 @@ def loop():
     # Compute wheel speeds in "PWM-like" domain
     speed_left = BASE_SPEED_PWM + int(correction)
     speed_right = BASE_SPEED_PWM - int(correction)
+
+    
 
     # Clamp
     speed_left = clamp(speed_left, MIN_PWM, MAX_PWM)

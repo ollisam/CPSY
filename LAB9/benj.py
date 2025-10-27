@@ -142,6 +142,13 @@ def loop():
     # Compute wheel speeds using new turning logic
     speed_left, speed_right = compute_turn_speeds(correction)
 
+    # NEW: Apply 20% power to inner wheel during turns
+    if correction > 5:  # Turning right significantly
+        speed_right = int(speed_left * 0.13)  # Inner wheel (right) at 20%
+    elif correction < -5:  # Turning left significantly  
+        speed_left = int(speed_right * 0.13)  # Inner wheel (left) at 20%
+
+
     # Clamp
     speed_left = clamp(speed_left, MIN_PWM, MAX_PWM)
     speed_right = clamp(speed_right, MIN_PWM, MAX_PWM)
