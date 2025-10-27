@@ -23,7 +23,7 @@ Ki = 1
 Kd = 1
 
 # --- Global speed limits (for gpiozero outputs) ---
-SPEED_CAP = 0.60        # 0..1 hard ceiling for motor magnitude (lower = slower)
+SPEED_CAP = 0.35        # 0..1 hard ceiling for motor magnitude (lower = slower)
 MIN_ACTIVE = 0.08       # deadband to prevent buzzing at very low speeds
 
 # Optional: limit how much PID can add/subtract per loop (in PWM-like units)
@@ -34,8 +34,14 @@ CORRECTION_LIMIT_PWM = 80
 BASE_SPEED_PWM = 20
 
 # Clamp speeds to keep some torque but avoid slamming max
-MIN_PWM = 20
+MIN_PWM = 0
 MAX_PWM = 255
+
+# Adaptive slowdown and slight asymmetry to prevent right-turn overshoot
+TURN_SLOWDOWN = 0.8   # fraction of base speed to potentially shed (0..1)
+RIGHT_TURN_SCALE = 0.7  # scale down right-turn correction (>0) to avoid overshoot
+# Use the known white/black spread to normalize how aggressive the slowdown is
+# (safe to compute later as well if black/white updated)
 
 # Integral windup guard (same spirit as original)
 I_MIN = -4
@@ -149,9 +155,19 @@ def loop():
     correction = clamp(correction, -CORRECTION_LIMIT_PWM, CORRECTION_LIMIT_PWM)
     previous_error = error
 
-    # Compute wheel speeds in "PWM-like" domain
-    speed_left = BASE_SPEED_PWM + int(correction)
-    speed_right = BASE_SPEED_PWM - int(correction)
+    # Slightly tame right turns to avoid overshooting the black line
+    if correction > 0:
+        correction *= RIGHT_TURN_SCALE
+
+    # Compute a dynamic base that slows down as the error grows
+    # Estimate an error scale using half the measured white/black spread
+    err_den = max(1.0, abs((white_value - black_value) * 0.5))
+    err_factor = min(1.0, abs(error) / err_den)
+    dynamic_base = int(BASE_SPEED_PWM * (1.0 - TURN_SLOWDOWN * err_factor))
+
+    # Compute wheel speeds in "PWM-like" domain with adaptive base
+    speed_left = dynamic_base + int(correction)
+    speed_right = dynamic_base - int(correction)
 
     # Clamp
     speed_left = clamp(speed_left, MIN_PWM, MAX_PWM)
