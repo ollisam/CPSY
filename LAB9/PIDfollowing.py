@@ -19,8 +19,8 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # PID + control params
 # -----------------------
 Kp = 10
-Ki = 0.0
-Kd = 24
+Ki = 0.01
+Kd = 8
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
