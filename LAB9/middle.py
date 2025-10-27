@@ -125,6 +125,8 @@ def loop():
     # Read sensor
     _, _, _, c = read_clear_channel()
 
+    print(c)
+
     # PID
     error = float(middle_value) - float(c)
 
