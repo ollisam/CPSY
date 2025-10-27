@@ -18,7 +18,7 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 # PID + control params
 # -----------------------
-Kp = 10
+Kp = 15
 Ki = 2
 Kd = 200
 
