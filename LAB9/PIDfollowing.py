@@ -18,43 +18,24 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 # PID + control params
 # -----------------------
-# PID tuned for *normalized* error (see loop())
-Kp = 1.0
-Ki = 0.02
-Kd = 0.15
-
-# --- Global speed limits (for gpiozero outputs) ---
-SPEED_CAP = 0.50       # 0..1 hard ceiling for motor magnitude (lower = slower)
-MIN_ACTIVE = 0.08       # deadband to prevent buzzing at very low speeds
-
-# Optional: limit how much PID can add/subtract per loop (in PWM-like units)
-CORRECTION_LIMIT_PWM = 80
+Kp = 24.0
+Ki = 1.0
+Kd = 1.0
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
-BASE_SPEED_PWM = 20
+BASE_SPEED_PWM = 30
 
 # Clamp speeds to keep some torque but avoid slamming max
-MIN_PWM = 0
+MIN_PWM = 20
 MAX_PWM = 255
 
-# Adaptive slowdown and slight asymmetry to prevent right-turn overshoot
-TURN_SLOWDOWN = 0.8   # fraction of base speed to potentially shed (0..1)
-RIGHT_TURN_SCALE = 0.7  # scale down right-turn correction (>0) to avoid overshoot
-# Use the known white/black spread to normalize how aggressive the slowdown is
-# (safe to compute later as well if black/white updated)
-
 # Integral windup guard (same spirit as original)
-I_MIN = -0.5
-I_MAX = 0.5
-
-INTEGRAL_DEADZONE = 0.02
-
-# Scale normalized PID output (roughly -1..1) into PWM-like correction range
-CORRECTION_SCALE_PWM = 120
+I_MIN = -4
+I_MAX = 4
 
 # If error is tiny, zero the integral to avoid drift
-# INTEGRAL_DEADZONE = 2.0
+INTEGRAL_DEADZONE = 2.0
 
 # The target "middle" clear channel value (overwritten by calibration)
 middle_value = 2500
@@ -77,8 +58,7 @@ def pwm_to_robot_speed(pwm_value):
     Convert 0..255 PWM-ish magnitude to 0..1 speed for gpiozero.
     """
     pwm_value = clamp(pwm_value, 0, 255)
-    # Map 0..255 to 0..SPEED_CAP so we have a global top speed limit
-    return (pwm_value / 255.0) * SPEED_CAP
+    return pwm_value / 255.0
 
 def set_motors(left_pwm_signed, right_pwm_signed):
     """
@@ -92,13 +72,7 @@ def set_motors(left_pwm_signed, right_pwm_signed):
     left_mag = pwm_to_robot_speed(abs(int(left_pwm_signed)))
     right_mag = pwm_to_robot_speed(abs(int(right_pwm_signed)))
 
-    # Apply a small deadband to avoid motor buzzing at very low duty
-    if 0 < left_mag < MIN_ACTIVE:
-        left_mag = 0.0
-    if 0 < right_mag < MIN_ACTIVE:
-        right_mag = 0.0
-
-    # Robot.value expects (-1..1) per side, already capped by SPEED_CAP
+    # Robot.value expects (-1..1) per side
     robot.value = (left_sign * left_mag, right_sign * right_mag)
 
 def stop():
@@ -112,32 +86,32 @@ def read_clear_channel():
 # -----------------------
 # Calibration
 # -----------------------
-# def calibrate_sensor():
-#     """
-#     Spin a bit to sample 'black' and 'white' under the sensor,
-#     then compute the midpoint.
-#     Movement here mirrors your Arduino: small opposite wheel spins.
-#     """
-#     global middle_value
+def calibrate_sensor():
+    """
+    Spin a bit to sample 'black' and 'white' under the sensor,
+    then compute the midpoint.
+    Movement here mirrors your Arduino: small opposite wheel spins.
+    """
+    global middle_value
 
-#     print("Calibrating: measuring black...")
-#     # turn in place (left backward, right forward)
-#     _, _, _, c_black = read_clear_channel()
-#     print(f"Black value: {c_black}")
+    print("Calibrating: measuring black...")
+    # turn in place (left backward, right forward)
+    _, _, _, c_black = read_clear_channel()
+    print(f"Black value: {c_black}")
 
-#     time.sleep(5)
+    time.sleep(5)
 
-#     print("Calibrating: measuring white...")
-#     # turn the other way (left forward, right backward)
-#     _, _, _, c_white = read_clear_channel()
-#     print(f"White value: {c_white}")
+    print("Calibrating: measuring white...")
+    # turn the other way (left forward, right backward)
+    _, _, _, c_white = read_clear_channel()
+    print(f"White value: {c_white}")
 
-#     time.sleep(5)
+    time.sleep(5)
 
-#     middle_value = (int(c_black) + int(c_white)) // 2
-#     print(f"Middle value = {middle_value}")
+    middle_value = (int(c_black) + int(c_white)) // 2
+    print(f"Middle value = {middle_value}")
 
-#     stop()
+    stop()
 
 # -----------------------
 # Main control loop
@@ -148,35 +122,21 @@ def loop():
     # Read sensor
     _, _, _, c = read_clear_channel()
 
-    # PID on *normalized* error so gains behave predictably regardless of sensor range
-    rng = max(50.0, abs(float(white_value) - float(black_value)))
-    error = (float(middle_value) - float(c)) / rng  # ~-0.5..0.5 when centered
-
-    # Integral with windup guard in normalized units
+    # PID
+    error = float(middle_value) - float(c)
     sum_error += error
     sum_error = clamp(sum_error, I_MIN, I_MAX)
+
     if abs(error) < INTEGRAL_DEADZONE:
         sum_error = 0.0
 
     differential = error - previous_error
-    pid_norm = Kp * error + Ki * sum_error + Kd * differential
+    correction = Kp * error + Ki * sum_error + Kd * differential
     previous_error = error
 
-    # Convert normalized PID output to PWM-like correction and clamp
-    correction = int(pid_norm * CORRECTION_SCALE_PWM)
-    correction = clamp(correction, -CORRECTION_LIMIT_PWM, CORRECTION_LIMIT_PWM)
-
-    # Slightly tame right turns to avoid overshooting the black line
-    if correction > 0:
-        correction *= RIGHT_TURN_SCALE
-
-    # Compute a dynamic base that slows down as the normalized error grows
-    err_factor = clamp(abs(error), 0.0, 1.0)
-    dynamic_base = int(BASE_SPEED_PWM * (1.0 - TURN_SLOWDOWN * err_factor))
-
-    # Compute wheel speeds in "PWM-like" domain with adaptive base
-    speed_left = dynamic_base + int(correction)
-    speed_right = dynamic_base - int(correction)
+    # Compute wheel speeds in "PWM-like" domain
+    speed_left = BASE_SPEED_PWM + int(correction)
+    speed_right = BASE_SPEED_PWM - int(correction)
 
     # Clamp
     speed_left = clamp(speed_left, MIN_PWM, MAX_PWM)
@@ -195,7 +155,7 @@ def main():
         print(f"ERROR: TCS34725 not detected or I2C issue: {e}")
         return
 
-    # calibrate_sensor()
+    calibrate_sensor()
     print("Entering control loop. Press Ctrl+C to stop.")
 
     try:
