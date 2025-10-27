@@ -19,7 +19,7 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # PID + control params
 # -----------------------
 Kp = 0.7
-Ki = 0.5
+Ki = 0.0
 Kd = 0.25
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
