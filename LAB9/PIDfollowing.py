@@ -53,12 +53,14 @@ sum_error = 0.0
 def clamp(x, lo, hi):
     return max(lo, min(hi, x))
 
+MIN_ACTIVE = 0.18   # try 0.18–0.22; must be <= cap (0.20)
+
 def pwm_to_robot_speed(pwm_value):
-    """
-    Convert 0..255 PWM-ish magnitude to 0..1 speed for gpiozero.
-    """
     pwm_value = clamp(pwm_value, 0, 255)
-    return (pwm_value / 255.0) * 0.2
+    mapped = (pwm_value / 255.0) * 0.13
+    if pwm_value == 0:
+        return 0.0
+    return max(mapped, MIN_ACTIVE)
 
 def set_motors(left_pwm_signed, right_pwm_signed):
     """
