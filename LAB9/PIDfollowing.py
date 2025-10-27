@@ -18,12 +18,13 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 # PID + control params
 # -----------------------
-Kp = 5
-Ki = 1
-Kd = 1
+# PID tuned for *normalized* error (see loop())
+Kp = 1.0
+Ki = 0.02
+Kd = 0.15
 
 # --- Global speed limits (for gpiozero outputs) ---
-SPEED_CAP = 0.7       # 0..1 hard ceiling for motor magnitude (lower = slower)
+SPEED_CAP = 0.35       # 0..1 hard ceiling for motor magnitude (lower = slower)
 MIN_ACTIVE = 0.08       # deadband to prevent buzzing at very low speeds
 
 # Optional: limit how much PID can add/subtract per loop (in PWM-like units)
@@ -39,16 +40,21 @@ MAX_PWM = 255
 
 # Adaptive slowdown and slight asymmetry to prevent right-turn overshoot
 TURN_SLOWDOWN = 0.8   # fraction of base speed to potentially shed (0..1)
-RIGHT_TURN_SCALE = 0.6  # scale down right-turn correction (>0) to avoid overshoot
+RIGHT_TURN_SCALE = 0.7  # scale down right-turn correction (>0) to avoid overshoot
 # Use the known white/black spread to normalize how aggressive the slowdown is
 # (safe to compute later as well if black/white updated)
 
 # Integral windup guard (same spirit as original)
-I_MIN = -4
-I_MAX = 4
+I_MIN = -0.5
+I_MAX = 0.5
+
+INTEGRAL_DEADZONE = 0.02
+
+# Scale normalized PID output (roughly -1..1) into PWM-like correction range
+CORRECTION_SCALE_PWM = 120
 
 # If error is tiny, zero the integral to avoid drift
-INTEGRAL_DEADZONE = 2.0
+# INTEGRAL_DEADZONE = 2.0
 
 # The target "middle" clear channel value (overwritten by calibration)
 middle_value = 2500
@@ -142,27 +148,30 @@ def loop():
     # Read sensor
     _, _, _, c = read_clear_channel()
 
-    # PID
-    error = float(middle_value) - float(c)
+    # PID on *normalized* error so gains behave predictably regardless of sensor range
+    rng = max(50.0, abs(float(white_value) - float(black_value)))
+    error = (float(middle_value) - float(c)) / rng  # ~-0.5..0.5 when centered
+
+    # Integral with windup guard in normalized units
     sum_error += error
     sum_error = clamp(sum_error, I_MIN, I_MAX)
-
     if abs(error) < INTEGRAL_DEADZONE:
         sum_error = 0.0
 
     differential = error - previous_error
-    correction = Kp * error + Ki * sum_error + Kd * differential
-    correction = clamp(correction, -CORRECTION_LIMIT_PWM, CORRECTION_LIMIT_PWM)
+    pid_norm = Kp * error + Ki * sum_error + Kd * differential
     previous_error = error
+
+    # Convert normalized PID output to PWM-like correction and clamp
+    correction = int(pid_norm * CORRECTION_SCALE_PWM)
+    correction = clamp(correction, -CORRECTION_LIMIT_PWM, CORRECTION_LIMIT_PWM)
 
     # Slightly tame right turns to avoid overshooting the black line
     if correction > 0:
         correction *= RIGHT_TURN_SCALE
 
-    # Compute a dynamic base that slows down as the error grows
-    # Estimate an error scale using half the measured white/black spread
-    err_den = max(1.0, abs((white_value - black_value) * 0.5))
-    err_factor = min(1.0, abs(error) / err_den)
+    # Compute a dynamic base that slows down as the normalized error grows
+    err_factor = clamp(abs(error), 0.0, 1.0)
     dynamic_base = int(BASE_SPEED_PWM * (1.0 - TURN_SLOWDOWN * err_factor))
 
     # Compute wheel speeds in "PWM-like" domain with adaptive base
