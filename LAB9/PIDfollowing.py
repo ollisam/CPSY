@@ -18,9 +18,9 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 # PID + control params
 # -----------------------
-Kp = 1.5
+Kp = 2
 Ki = 0.0
-Kd = 0.5
+Kd = 0.8
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
@@ -56,7 +56,7 @@ def clamp(x, lo, hi):
 
 def pwm_to_robot_speed(pwm_value):
     pwm_value = clamp(pwm_value, 0, 255)
-    pwm_value = (pwm_value / 255.0) * 0.15
+    pwm_value = (pwm_value / 255.0) * 0.13
     return pwm_value
 
 def set_motors(left_pwm_signed, right_pwm_signed):
