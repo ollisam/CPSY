@@ -24,7 +24,7 @@ Kd = 1.5
 
 # When the sensor is near the middle value, force a forward cruise
 CENTER_BAND = 120       # counts around middle_value treated as "centered"
-CENTER_PWM  = 245       # forward PWM when centered (maps to ~0.134 with 0.14 cap)
+CENTER_PWM  = 600       # forward PWM when centered (maps to ~0.134 with 0.14 cap)
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
