@@ -137,7 +137,11 @@ def loop():
     speed_left = BASE_SPEED_PWM + int(correction)
     speed_right = BASE_SPEED_PWM - int(correction)
 
-    
+    if correction > 5:  # Turning right significantly
+        speed_right = int(speed_left * 0.13)  # Inner wheel (right) at 20%
+    elif correction < -5:  # Turning left significantly  
+        speed_left = int(speed_right * 0.13)  # Inner wheel (left) at 20%
+
 
     # Clamp
     speed_left = clamp(speed_left, MIN_PWM, MAX_PWM)
