@@ -39,7 +39,7 @@ MAX_PWM = 255
 
 # Adaptive slowdown and slight asymmetry to prevent right-turn overshoot
 TURN_SLOWDOWN = 0.8   # fraction of base speed to potentially shed (0..1)
-RIGHT_TURN_SCALE = 0.7  # scale down right-turn correction (>0) to avoid overshoot
+RIGHT_TURN_SCALE = 0.5  # scale down right-turn correction (>0) to avoid overshoot
 # Use the known white/black spread to normalize how aggressive the slowdown is
 # (safe to compute later as well if black/white updated)
 
