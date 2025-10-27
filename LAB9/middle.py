@@ -22,6 +22,10 @@ Kp = 2
 Ki = 0.0
 Kd = 0.8
 
+# When the sensor is near the middle value, force a forward cruise
+CENTER_BAND = 120       # counts around middle_value treated as "centered"
+CENTER_PWM  = 245       # forward PWM when centered (maps to ~0.134 with 0.14 cap)
+
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
 BASE_SPEED_PWM = 255
@@ -123,19 +127,27 @@ def loop():
 
     # PID
     error = float(middle_value) - float(c)
-    sum_error += error
-    sum_error = clamp(sum_error, I_MIN, I_MAX)
 
-    if abs(error) < INTEGRAL_DEADZONE:
+    # If we are close to the middle, drive straight forward at a guaranteed cruise speed
+    if abs(error) <= CENTER_BAND:
         sum_error = 0.0
+        previous_error = 0.0
+        speed_left = CENTER_PWM
+        speed_right = CENTER_PWM
+    else:
+        # Normal PID behavior when away from the center band
+        sum_error += error
+        sum_error = clamp(sum_error, I_MIN, I_MAX)
+        if abs(error) < INTEGRAL_DEADZONE:
+            sum_error = 0.0
 
-    differential = error - previous_error
-    correction = Kp * error + Ki * sum_error + Kd * differential
-    previous_error = error
+        differential = error - previous_error
+        correction = Kp * error + Ki * sum_error + Kd * differential
+        previous_error = error
 
-    # Compute wheel speeds in "PWM-like" domain
-    speed_left = BASE_SPEED_PWM + int(correction)
-    speed_right = BASE_SPEED_PWM - int(correction)
+        # Compute wheel speeds in "PWM-like" domain
+        speed_left = BASE_SPEED_PWM + int(correction)
+        speed_right = BASE_SPEED_PWM - int(correction)
 
     # Clamp
     speed_left = clamp(speed_left, MIN_PWM, MAX_PWM)
