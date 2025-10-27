@@ -45,7 +45,7 @@ I_MAX = 4
 INTEGRAL_DEADZONE = 2.0
 
 # The target "middle" clear channel value (overwritten by calibration)
-middle_value = 3270
+middle_value = 2500
 black_value = 500
 white_value = 5000
 
@@ -177,7 +177,7 @@ def main():
         while True:
             loop()
             # Match typical Arduino loop cadence (integration time is 50ms; keep a modest pace)
-            time.sleep(0.001)
+            time.sleep(0.02)
     except KeyboardInterrupt:
         print("\nStopping.")
     finally:
