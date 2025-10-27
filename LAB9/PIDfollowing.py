@@ -19,7 +19,7 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # PID + control params
 # -----------------------
 Kp = 24
-Ki = 1
+Ki = 2
 Kd = 1
 
 # --- Global speed limits (for gpiozero outputs) ---
