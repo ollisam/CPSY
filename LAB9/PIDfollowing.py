@@ -18,9 +18,9 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 # PID + control params
 # -----------------------
-Kp = 24
-Ki = 1
-Kd = 1
+Kp = 0
+Ki = 0
+Kd = 0
 
 # --- Global speed limits (for gpiozero outputs) ---
 SPEED_CAP = 0.7       # 0..1 hard ceiling for motor magnitude (lower = slower)
