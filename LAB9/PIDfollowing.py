@@ -163,7 +163,7 @@ def main():
         while True:
             loop()
             # Match typical Arduino loop cadence (integration time is 50ms; keep a modest pace)
-            time.sleep(0.002)
+            time.sleep(0.01)
     except KeyboardInterrupt:
         print("\nStopping.")
     finally:
