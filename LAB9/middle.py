@@ -137,7 +137,7 @@ def loop():
         # Drive forward at a guaranteed small speed without PWM scaling
         sum_error = 0.0
         previous_error = 0.0
-        robot.value = (CENTER_SPEED * 0.13, CENTER_SPEED * 0.13)
+        robot.value = (CENTER_SPEED * 0.2, CENTER_SPEED * 0.2)
         return
     else:
         # Normal PID behavior when away from the center band
