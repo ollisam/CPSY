@@ -27,7 +27,7 @@ Kd = 100
 BASE_SPEED_PWM = 255
 
 # Clamp speeds to keep some torque but avoid slamming max
-MIN_PWM = 0
+MIN_PWM = 20
 MAX_PWM = 500
 
 # Integral windup guard (same spirit as original)
