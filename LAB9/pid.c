@@ -103,6 +103,6 @@ void control_motors(int speed_left, int speed_right) {
         speed_right = abs(speed_right);
     }
 
-    analog_write(PWM_A, speed_left);
-    analog_write(PWM_B, speed_right)
+    analogWrite(PWM_A, speed_left);
+    analogWrite(PWM_B, speed_right)
 }
