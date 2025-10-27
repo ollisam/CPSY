@@ -18,13 +18,13 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 # PID + control params
 # -----------------------
-Kp = 1.0
-Ki = 1.0
-Kd = 1.0
+Kp = 0.8
+Ki = 0.05
+Kd = 0.02
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
-BASE_SPEED_PWM = 0.5
+BASE_SPEED_PWM = 20
 
 # Clamp speeds to keep some torque but avoid slamming max
 MIN_PWM = 20
