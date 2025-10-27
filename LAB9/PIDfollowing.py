@@ -20,7 +20,7 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 Kp = 24
 Ki = 0.01
-Kd = 250
+Kd = 280
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
@@ -163,7 +163,7 @@ def main():
         while True:
             loop()
             # Match typical Arduino loop cadence (integration time is 50ms; keep a modest pace)
-            time.sleep(0.02)
+            time.sleep(0.002)
     except KeyboardInterrupt:
         print("\nStopping.")
     finally:
