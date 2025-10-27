@@ -20,7 +20,7 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 Kp = 3
 Ki = 0.0
-Kd = 1.2
+Kd = 3
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
@@ -28,7 +28,7 @@ BASE_SPEED_PWM = 255
 
 # Clamp speeds to keep some torque but avoid slamming max
 MIN_PWM = 0
-MAX_PWM = 600
+MAX_PWM = 255
 
 # Integral windup guard (same spirit as original)
 I_MIN = -4
@@ -56,7 +56,7 @@ def clamp(x, lo, hi):
 
 def pwm_to_robot_speed(pwm_value):
     pwm_value = clamp(pwm_value, 0, 255)
-    pwm_value = (pwm_value / 255.0) * 0.13
+    pwm_value = (pwm_value / 255.0) * 0.2
     return pwm_value
 
 def set_motors(left_pwm_signed, right_pwm_signed):
