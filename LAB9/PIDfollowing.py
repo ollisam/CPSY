@@ -18,7 +18,7 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 # PID + control params
 # -----------------------
-Kp = 24.0
+Kp = 3.0
 Ki = 1.0
 Kd = 1.0
 
@@ -86,32 +86,32 @@ def read_clear_channel():
 # -----------------------
 # Calibration
 # -----------------------
-def calibrate_sensor():
-    """
-    Spin a bit to sample 'black' and 'white' under the sensor,
-    then compute the midpoint.
-    Movement here mirrors your Arduino: small opposite wheel spins.
-    """
-    global middle_value
+# def calibrate_sensor():
+#     """
+#     Spin a bit to sample 'black' and 'white' under the sensor,
+#     then compute the midpoint.
+#     Movement here mirrors your Arduino: small opposite wheel spins.
+#     """
+#     global middle_value
 
-    print("Calibrating: measuring black...")
-    # turn in place (left backward, right forward)
-    _, _, _, c_black = read_clear_channel()
-    print(f"Black value: {c_black}")
+#     print("Calibrating: measuring black...")
+#     # turn in place (left backward, right forward)
+#     _, _, _, c_black = read_clear_channel()
+#     print(f"Black value: {c_black}")
 
-    time.sleep(5)
+#     time.sleep(5)
 
-    print("Calibrating: measuring white...")
-    # turn the other way (left forward, right backward)
-    _, _, _, c_white = read_clear_channel()
-    print(f"White value: {c_white}")
+#     print("Calibrating: measuring white...")
+#     # turn the other way (left forward, right backward)
+#     _, _, _, c_white = read_clear_channel()
+#     print(f"White value: {c_white}")
 
-    time.sleep(5)
+#     time.sleep(5)
 
-    middle_value = (int(c_black) + int(c_white)) // 2
-    print(f"Middle value = {middle_value}")
+#     middle_value = (int(c_black) + int(c_white)) // 2
+#     print(f"Middle value = {middle_value}")
 
-    stop()
+#     stop()
 
 # -----------------------
 # Main control loop
