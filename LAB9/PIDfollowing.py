@@ -94,21 +94,17 @@ def calibrate_sensor():
 
     print("Calibrating: measuring black...")
     # turn in place (left backward, right forward)
-    set_motors(-85, 85)     # signed 'PWM-ish' speed
-    time.sleep(5)
-    stop()
-    time.sleep(2)
     _, _, _, c_black = read_clear_channel()
     print(f"Black value: {c_black}")
 
+    time.sleep(5)
+
     print("Calibrating: measuring white...")
     # turn the other way (left forward, right backward)
-    set_motors(85, -85)
-    time.sleep(5)
-    stop()
-    time.sleep(5)
     _, _, _, c_white = read_clear_channel()
     print(f"White value: {c_white}")
+
+    time.sleep(5)
 
     middle_value = (int(c_black) + int(c_white)) // 2
     print(f"Middle value = {middle_value}")
