@@ -27,7 +27,7 @@ CENTER_BAND = 120       # counts around middle_value treated as "centered"
 CENTER_PWM  = 2000       # forward PWM when centered (maps to ~0.134 with 0.14 cap)
 
 # Direct drive speed when centered (bypass PWM mapping to guarantee motion)
-CENTER_SPEED = 0.14   # 14% duty; tune 0.14–0.16 if needed
+CENTER_SPEED = 0.5   # 14% duty; tune 0.14–0.16 if needed
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
