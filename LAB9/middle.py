@@ -20,7 +20,7 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 Kp = 2
 Ki = 0.0
-Kd = 0.8
+Kd = 1.2
 
 # When the sensor is near the middle value, force a forward cruise
 CENTER_BAND = 120       # counts around middle_value treated as "centered"
