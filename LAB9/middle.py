@@ -26,6 +26,9 @@ Kd = 1.5
 CENTER_BAND = 120       # counts around middle_value treated as "centered"
 CENTER_PWM  = 2000       # forward PWM when centered (maps to ~0.134 with 0.14 cap)
 
+# Direct drive speed when centered (bypass PWM mapping to guarantee motion)
+CENTER_SPEED = 0.14   # 14% duty; tune 0.14–0.16 if needed
+
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
 BASE_SPEED_PWM = 255
@@ -130,12 +133,12 @@ def loop():
     # PID
     error = float(middle_value) - float(c)
 
-    # If we are close to the middle, drive straight forward at a guaranteed cruise speed
     if abs(error) <= CENTER_BAND:
+        # Drive forward at a guaranteed small speed without PWM scaling
         sum_error = 0.0
         previous_error = 0.0
-        speed_left = CENTER_PWM
-        speed_right = CENTER_PWM
+        robot.value = (CENTER_SPEED, CENTER_SPEED)
+        return
     else:
         # Normal PID behavior when away from the center band
         sum_error += error
@@ -151,14 +154,12 @@ def loop():
         speed_left = BASE_SPEED_PWM + int(correction)
         speed_right = BASE_SPEED_PWM - int(correction)
 
-    # Clamp
-    speed_left = clamp(speed_left, MIN_PWM, MAX_PWM)
-    speed_right = clamp(speed_right, MIN_PWM, MAX_PWM)
+        # Clamp
+        speed_left = clamp(speed_left, MIN_PWM, MAX_PWM)
+        speed_right = clamp(speed_right, MIN_PWM, MAX_PWM)
 
-    
-
-    # Apply
-    set_motors(speed_left, speed_right)
+        # Apply
+        set_motors(speed_left, speed_right)
 
 def main():
     print("Starting up...")
