@@ -22,6 +22,13 @@ Kp = 0.8
 Ki = 0.05
 Kd = 0.02
 
+# --- Global speed limits (for gpiozero outputs) ---
+SPEED_CAP = 0.30        # 0..1 hard ceiling for motor magnitude (lower = slower)
+MIN_ACTIVE = 0.08       # deadband to prevent buzzing at very low speeds
+
+# Optional: limit how much PID can add/subtract per loop (in PWM-like units)
+CORRECTION_LIMIT_PWM = 80
+
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
 BASE_SPEED_PWM = 20
@@ -58,7 +65,8 @@ def pwm_to_robot_speed(pwm_value):
     Convert 0..255 PWM-ish magnitude to 0..1 speed for gpiozero.
     """
     pwm_value = clamp(pwm_value, 0, 255)
-    return pwm_value / 255.0
+    # Map 0..255 to 0..SPEED_CAP so we have a global top speed limit
+    return (pwm_value / 255.0) * SPEED_CAP
 
 def set_motors(left_pwm_signed, right_pwm_signed):
     """
@@ -72,7 +80,13 @@ def set_motors(left_pwm_signed, right_pwm_signed):
     left_mag = pwm_to_robot_speed(abs(int(left_pwm_signed)))
     right_mag = pwm_to_robot_speed(abs(int(right_pwm_signed)))
 
-    # Robot.value expects (-1..1) per side
+    # Apply a small deadband to avoid motor buzzing at very low duty
+    if 0 < left_mag < MIN_ACTIVE:
+        left_mag = 0.0
+    if 0 < right_mag < MIN_ACTIVE:
+        right_mag = 0.0
+
+    # Robot.value expects (-1..1) per side, already capped by SPEED_CAP
     robot.value = (left_sign * left_mag, right_sign * right_mag)
 
 def stop():
@@ -132,6 +146,7 @@ def loop():
 
     differential = error - previous_error
     correction = Kp * error + Ki * sum_error + Kd * differential
+    correction = clamp(correction, -CORRECTION_LIMIT_PWM, CORRECTION_LIMIT_PWM)
     previous_error = error
 
     # Compute wheel speeds in "PWM-like" domain
