@@ -20,14 +20,14 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # -----------------------
 Kp = 10
 Ki = 5
-Kd = 75
+Kd = 50
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
 BASE_SPEED_PWM = 255
 
 # Clamp speeds to keep some torque but avoid slamming max
-MIN_PWM = 100
+MIN_PWM = 75
 MAX_PWM = 450
 
 # Integral windup guard (same spirit as original)
