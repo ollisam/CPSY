@@ -24,7 +24,7 @@ Ki = 0.02
 Kd = 0.15
 
 # --- Global speed limits (for gpiozero outputs) ---
-SPEED_CAP = 0.35       # 0..1 hard ceiling for motor magnitude (lower = slower)
+SPEED_CAP = 0.50       # 0..1 hard ceiling for motor magnitude (lower = slower)
 MIN_ACTIVE = 0.08       # deadband to prevent buzzing at very low speeds
 
 # Optional: limit how much PID can add/subtract per loop (in PWM-like units)
