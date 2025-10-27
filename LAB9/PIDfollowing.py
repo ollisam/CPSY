@@ -24,7 +24,7 @@ Kd = 0.1
 
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
-BASE_SPEED_PWM = 30
+BASE_SPEED_PWM = 235
 
 # Clamp speeds to keep some torque but avoid slamming max
 MIN_PWM = 20
