@@ -27,13 +27,9 @@ Kd = 75
 BASE_SPEED_PWM = 255
 
 # Clamp speeds to keep some torque but avoid slamming max
-<<<<<<< HEAD
-MIN_PWM = 50
-MAX_PWM = 1000
-=======
+
 MIN_PWM = 0
 MAX_PWM = 500
->>>>>>> parent of bf89b6c (Update PIDfollowing.py)
 
 # Integral windup guard (same spirit as original)
 I_MIN = -4
