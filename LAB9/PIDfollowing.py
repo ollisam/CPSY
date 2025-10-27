@@ -155,7 +155,7 @@ def main():
         print(f"ERROR: TCS34725 not detected or I2C issue: {e}")
         return
 
-    calibrate_sensor()
+    # calibrate_sensor()
     print("Entering control loop. Press Ctrl+C to stop.")
 
     try:
