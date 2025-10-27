@@ -24,7 +24,7 @@ Kd = 1.5
 
 # When the sensor is near the middle value, force a forward cruise
 CENTER_BAND = 120       # counts around middle_value treated as "centered"
-CENTER_PWM  = 300       # forward PWM when centered (maps to ~0.134 with 0.14 cap)
+CENTER_PWM  = 255       # forward PWM when centered (maps to ~0.134 with 0.14 cap)
 
 # Direct drive speed when centered (bypass PWM mapping to guarantee motion)
 CENTER_SPEED = 0.5   # 14% duty; tune 0.14–0.16 if needed
@@ -35,7 +35,7 @@ BASE_SPEED_PWM = 255
 
 # Clamp speeds to keep some torque but avoid slamming max
 MIN_PWM = 0
-MAX_PWM = 300
+MAX_PWM = 255
 
 # Integral windup guard (same spirit as original)
 I_MIN = -4
@@ -137,7 +137,7 @@ def loop():
         # Drive forward at a guaranteed small speed without PWM scaling
         sum_error = 0.0
         previous_error = 0.0
-        robot.value = (CENTER_SPEED, CENTER_SPEED)
+        robot.value = (CENTER_SPEED * 0.13, CENTER_SPEED * 0.13)
         return
     else:
         # Normal PID behavior when away from the center band
