@@ -3,10 +3,8 @@ import time
 import board
 import busio
 import adafruit_tcs34725
-import math
-
-# --- NEW: distance sensor bits ---
 import digitalio
+import math
 import adafruit_mcp3xxx.mcp3008 as MCP
 from adafruit_mcp3xxx.analog_in import AnalogIn
 
@@ -15,18 +13,10 @@ from adafruit_mcp3xxx.analog_in import AnalogIn
 # -----------------------
 robot = Robot(left=('GPIO13','GPIO19'), right=('GPIO12','GPIO18'))
 
-# TCS34725 (line sensor)
 i2c = busio.I2C(board.SCL, board.SDA)
 tcs = adafruit_tcs34725.TCS34725(i2c)
-tcs.integration_time = 50   # ms (valid: 2.4, 24, 50, 101, 154, 700)
+tcs.integration_time = 50   # ms (valid options in this lib include 2.4, 24, 50, 101, 154, 700)
 tcs.gain = 4                # valid gains: 1, 4, 16, 60
-
-# --- NEW: MCP3008 (distance sensor via analog voltage) ---
-# Assumes sensor output to MCP3008 channel 0 (P0) and CE0 chip select.
-spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
-cs = digitalio.DigitalInOut(board.CE0)
-mcp = MCP.MCP3008(spi, cs)
-dist_chan = AnalogIn(mcp, MCP.P0)
 
 # -----------------------
 # PID + control params
@@ -35,11 +25,16 @@ Kp = 10
 Ki = 1.5
 Kd = 90
 
+# ----- COL AVOID -----
+NEAR_VOLTAGE = 2.0      # volts considered "too close" (~20 cm)
+SAMPLE_INTERVAL = 0.05  # seconds between sensor reads (50 ms)
+
 # The original code used "PWM" in [0..255]. We'll compute in that domain,
 # then map to Robot's [-1..1].
 BASE_SPEED_PWM = 45
 
 # Clamp speeds to keep some torque but avoid slamming max
+
 MIN_DRIVE_PWM = 30
 MIN_PWM = 0
 MAX_PWM = 50
@@ -62,24 +57,9 @@ previous_error = 0.0
 sum_error = 0.0
 
 # -----------------------
-# Collision avoidance config/state (NEW)
-# -----------------------
-NEAR_VOLTAGE = 2.0       # volts considered "too close" (~20 cm from your lab)
-SAMPLE_INTERVAL = 0.05   # seconds between distance reads (50 ms)
-CLEAR_SAMPLES_NEEDED = 3 # require consecutive safe samples before resuming
-
-last_range_sample_t = 0.0
-last_voltage = 0.0
-blocked = False
-clear_count = 0
-
-def too_close(voltage: float) -> bool:
-    """Return True if something is within our 'unsafe' range."""
-    return voltage >= NEAR_VOLTAGE
-
-# -----------------------
 # Utility helpers
 # -----------------------
+
 def apply_min_drive(pwm):
     if pwm <= 0:
         return 0
@@ -87,6 +67,7 @@ def apply_min_drive(pwm):
 
 def clamp(x, lo, hi):
     return max(lo, min(hi, x))
+
 
 def pwm_to_robot_speed(pwm_value):
     pwm_value = clamp(pwm_value, 0, 255)
@@ -98,12 +79,14 @@ def set_motors(left_pwm_signed, right_pwm_signed):
     Accept signed "PWM-like" speeds in range [-255..255],
     map to Robot.value which is tuple in [-1..1].
     """
+    # Direction + magnitude split
     left_sign = 1 if left_pwm_signed >= 0 else -1
     right_sign = 1 if right_pwm_signed >= 0 else -1
 
     left_mag = pwm_to_robot_speed(abs(int(left_pwm_signed)))
     right_mag = pwm_to_robot_speed(abs(int(right_pwm_signed)))
 
+    # Robot.value expects (-1..1) per side
     robot.value = (left_sign * left_mag, right_sign * right_mag)
 
 def stop():
@@ -114,38 +97,49 @@ def read_clear_channel():
     r, g, b, c = tcs.color_raw
     return r, g, b, c
 
+# --- SENSOR CONFIG ---
+
+# Build IR distance sensor channel
+# SPI + MCP3008 channel 0
+spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
+cs = digitalio.DigitalInOut(board.D5)  # GPIO5
+mcp = MCP.MCP3008(spi, cs)
+sensor = AnalogIn(mcp, MCP.P0)
+
+def too_close(voltage: float) -> bool:
+    """Return True if something is within our 'unsafe' range."""
+    return voltage >= NEAR_VOLTAGE
+
+
 # -----------------------
-# Collision avoidance sampling (NEW)
+# Calibration
 # -----------------------
-def check_obstacle_now():
-    """
-    Sample the distance sensor if SAMPLE_INTERVAL elapsed.
-    Update global blocked/clear_count state.
-    """
-    global last_range_sample_t, last_voltage, blocked, clear_count
+# def calibrate_sensor():
+#     """
+#     Spin a bit to sample 'black' and 'white' under the sensor,
+#     then compute the midpoint.
+#     Movement here mirrors your Arduino: small opposite wheel spins.
+#     """
+#     global middle_value
 
-    print(last_range_sample_t)
+#     print("Calibrating: measuring black...")
+#     # turn in place (left backward, right forward)
+#     _, _, _, c_black = read_clear_channel()
+#     print(f"Black value: {c_black}")
 
-    now = time.monotonic()
-    if (now - last_range_sample_t) < SAMPLE_INTERVAL:
-        return  # respect sampling rate
+#     time.sleep(5)
 
-    last_range_sample_t = now
-    last_voltage = dist_chan.voltage
+#     print("Calibrating: measuring white...")
+#     # turn the other way (left forward, right backward)
+#     _, _, _, c_white = read_clear_channel()
+#     print(f"White value: {c_white}")
 
-    if too_close(last_voltage):
-        if not blocked:
-            print(f"[COLLISION] Obstacle detected: {last_voltage:0.2f} V -> STOP")
-        blocked = True
-        clear_count = 0
-        stop()
-    else:
-        if blocked:
-            clear_count += 1
-            if clear_count >= CLEAR_SAMPLES_NEEDED:
-                blocked = False
-                clear_count = 0
-                print(f"[COLLISION] Clear after {CLEAR_SAMPLES_NEEDED} samples; resuming.")
+#     time.sleep(5)
+
+#     middle_value = (int(c_black) + int(c_white)) // 2
+#     print(f"Middle value = {middle_value}")
+
+#     stop()
 
 # -----------------------
 # Main control loop
@@ -153,15 +147,11 @@ def check_obstacle_now():
 def loop():
     global error, previous_error, sum_error
 
-    # --- always check obstacle first ---
-    check_obstacle_now()
-
-    # If blocked, keep motors off and return early
-    if blocked:
-        stop()
+    if too_close(sensor.voltage):
+        robot.stop()
         return
 
-    # Otherwise, proceed with line following PID
+    # Read sensor
     _, _, _, c = read_clear_channel()
 
     # PID
@@ -187,24 +177,17 @@ def loop():
     speed_left  = apply_min_drive(speed_left)
     speed_right = apply_min_drive(speed_right)
 
+    # Apply
     set_motors(speed_left, speed_right)
 
 def main():
     print("Starting up...")
-    # Quick sensor presence sanity check for TCS34725
+    # Quick sensor presence sanity check
     try:
         _ = tcs.color_raw
         print("TCS34725 detected.")
     except Exception as e:
         print(f"ERROR: TCS34725 not detected or I2C issue: {e}")
-        return
-
-    # Quick sanity read on MCP3008 distance sensor
-    try:
-        v = dist_chan.voltage
-        print(f"MCP3008 distance sensor OK. Initial V={v:0.2f} V")
-    except Exception as e:
-        print(f"ERROR: MCP3008/analog distance sensor issue: {e}")
         return
 
     #calibrate_sensor()
@@ -213,7 +196,7 @@ def main():
     try:
         while True:
             loop()
-            # PID loop cadence; distance sampling is rate-limited internally
+            # Match typical Arduino loop cadence (integration time is 50ms; keep a modest pace)
             time.sleep(0.01)
     except KeyboardInterrupt:
         print("\nStopping.")
