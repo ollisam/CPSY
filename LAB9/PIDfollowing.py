@@ -17,7 +17,7 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 
 # -----------------------
 # PID + control params
-# -----------------------
+# ----------------------
 Kp = 10
 Ki = 2
 Kd = 100
@@ -57,7 +57,7 @@ def clamp(x, lo, hi):
 
 def pwm_to_robot_speed(pwm_value):
     pwm_value = clamp(pwm_value, 0, 255)
-    pwm_value = (pwm_value / 255.0) * 0.160
+    pwm_value = (pwm_value / 255.0) * 0.18
     return pwm_value
 
 def set_motors(left_pwm_signed, right_pwm_signed):
