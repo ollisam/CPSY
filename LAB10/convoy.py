@@ -24,7 +24,7 @@ tcs.gain = 4                # valid gains: 1, 4, 16, 60
 # --- NEW: MCP3008 (distance sensor via analog voltage) ---
 # Assumes sensor output to MCP3008 channel 0 (P0) and CE0 chip select.
 spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
-cs = digitalio.DigitalInOut(board.CE0)
+cs = digitalio.DigitalInOut(board.D5)
 mcp = MCP.MCP3008(spi, cs)
 dist_chan = AnalogIn(mcp, MCP.P0)
 
@@ -124,7 +124,7 @@ def check_obstacle_now():
     """
     global last_range_sample_t, last_voltage, blocked, clear_count
 
-    print(last_range_sample_t)
+    print(last_voltage)
 
     now = time.monotonic()
     if (now - last_range_sample_t) < SAMPLE_INTERVAL:
