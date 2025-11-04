@@ -1,10 +1,9 @@
-# line_follow_stop_and_scan_gpiozero.py
+# line_follow_zigzag_gpiozero.py
 from gpiozero import Robot
 import time
 import board
 import busio
 import adafruit_tcs34725
-from collections import deque
 
 # === CONFIG ===
 # Motor wiring: (left motor forward/backward, right motor forward/backward)
@@ -16,174 +15,99 @@ tcs = adafruit_tcs34725.TCS34725(i2c)
 
 # Sensor tuning
 tcs.integration_time = 50   # ms
-tcs.gain = 4                # try 4–16 depending on ambient light
+tcs.gain = 4
 
 # Speed settings
-FORWARD_SPEED = 0.35        # ~35–40% like you wanted
-TURN_SPEED    = 0.28        # spin speed for scanning; keep moderate
+FORWARD_SPEED = 0.15
+TURN_SPEED    = 0.15
 
 # Timing / thresholds
-SAMPLE_DT     = 0.02        # control loop ~50 Hz
-LOST_DEBOUNCE = 0.15        # must be "off" for 150 ms to be considered lost
-SCAN_SIDE_TIME = 1.0        # max seconds to scan on one side before swapping
+SAMPLE_DT     = 0.02
+LOST_AFTER    = 0.15
 
-# Thresholds (will be set by calibrate(); fallback constants are here)
-USE_AUTOCAL   = True
-BLACK_LEVEL   = 2500        # fallback raw "clear" value over black
-WHITE_LEVEL   = 12000       # fallback raw "clear" value over white
-ON_THRESH     = None        # computed: value <= ON_THRESH => on black line
-OFF_THRESH    = None        # computed: value >= OFF_THRESH => off the line (hysteresis band)
+SWEEP_START   = 0.10
+SWEEP_STEP    = 0.15
+SWEEP_MAX     = 0.50
 
-# Smoothing
-AVG_WINDOW    = 5           # moving average samples
+# Search behavior tuning
+BACKUP_SPEED  = 0.20   # speed while backing up during search
+BACKUP_TIME   = 0.22   # seconds to back up after each arc sweep when not found
+ARC_BIAS      = 0.5    # 0..1, how much slower the inner wheel is during arc (higher => tighter turn)
 
 # ---- Sensor helpers ----
 def read_brightness():
-    # TCS34725 raw "clear" channel
     _, _, _, clear = tcs.color_raw
     return float(clear)
 
-def calibrate():
-    """
-    Quick two-point calibration:
-      1) Place sensor over BLACK line when prompted.
-      2) Then place over WHITE background when prompted.
-    Computes ON/OFF thresholds with a small hysteresis band.
-    """
-    global BLACK_LEVEL, WHITE_LEVEL, ON_THRESH, OFF_THRESH
+def is_black(value, threshold):
+    return value <= threshold
 
-    print("Calibration: place sensor over BLACK line... (sampling)")
-    time.sleep(1.0)
-    blacks = [read_brightness() for _ in range(60)]
-    BLACK_LEVEL = sum(blacks)/len(blacks)
-    print(f"  black avg = {BLACK_LEVEL:.0f}")
-
-    print("Calibration: now place over WHITE background... (sampling)")
-    time.sleep(1.0)
-    whites = [read_brightness() for _ in range(60)]
-    WHITE_LEVEL = sum(whites)/len(whites)
-    print(f"  white avg = {WHITE_LEVEL:.0f}")
-
-    # Safety order
-    if WHITE_LEVEL < BLACK_LEVEL:
-        WHITE_LEVEL, BLACK_LEVEL = BLACK_LEVEL, WHITE_LEVEL
-
-    # Thresholds with hysteresis (10% of span)
-    span = max(100.0, WHITE_LEVEL - BLACK_LEVEL)
-    mid = (WHITE_LEVEL + BLACK_LEVEL) * 0.5
-    band = 0.10 * span
-    ON_THRESH  = mid - band * 0.5   # <= ON means we're on the dark line
-    OFF_THRESH = mid + band * 0.5   # >= OFF means we're clearly off it
-
-    print(f"Thresholds set: ON<= {ON_THRESH:.0f}   OFF>= {OFF_THRESH:.0f}")
-
-def set_thresholds_from_fallback():
-    global ON_THRESH, OFF_THRESH
-    span = max(100.0, WHITE_LEVEL - BLACK_LEVEL)
-    mid = (WHITE_LEVEL + BLACK_LEVEL) * 0.5
-    band = 0.10 * span
-    ON_THRESH  = mid - band * 0.5
-    OFF_THRESH = mid + band * 0.5
-    print(f"(No calibration) Using thresholds: ON<= {ON_THRESH:.0f}  OFF>= {OFF_THRESH:.0f}")
-
-def on_line(x):   # x is brightness (lower = darker)
-    return x <= ON_THRESH
-
-def off_line(x):
-    return x >= OFF_THRESH
-
-# ---- State machine ----
-class State:
-    FOLLOW = 0
-    SCAN_RIGHT = 1
-    SCAN_LEFT  = 2
-
+# ---- Main loop ----
 def main():
-    # Calibrate or use defaults
-    if USE_AUTOCAL:
-        calibrate()
-    else:
-        set_thresholds_from_fallback()
-
+    threshold = 3000
     print("Starting line following... (Ctrl+C to stop)")
-    state = State.FOLLOW
-    last_seen_time = time.monotonic()
-    last_seen_side = +1    # +1 means last known drift to the RIGHT; -1 to the LEFT
-    scan_start = None
 
-    # small moving average for brightness
-    avgq = deque(maxlen=AVG_WINDOW)
+    last_seen = time.monotonic()
+    sweep_left = True
+    sweep_len = SWEEP_START
 
     try:
-        robot.forward(FORWARD_SPEED)
-
         while True:
-            b = read_brightness()
-            avgq.append(b)
-            b_sm = sum(avgq)/len(avgq)
-
+            brightness = read_brightness()
             now = time.monotonic()
 
-            if state == State.FOLLOW:
-                if on_line(b_sm):
-                    last_seen_time = now
-                    # Update last_seen_side using tiny heuristic: if brightness rising vs falling
-                    # (optional; comment out if not useful with your track)
-                    # last_seen_side = +1 if derivative > 0 else -1
-                elif off_line(b_sm):
-                    # Debounce "lost"
-                    if (now - last_seen_time) >= LOST_DEBOUNCE:
-                        # Stop and start scanning toward last_seen_side first
-                        robot.stop()
-                        if last_seen_side >= 0:
-                            state = State.SCAN_RIGHT
-                        else:
-                            state = State.SCAN_LEFT
-                        scan_start = time.monotonic()
-                        continue
-                # keep rolling
+            if is_black(brightness, threshold):
                 robot.forward(FORWARD_SPEED)
+                last_seen = now
+                sweep_len = SWEEP_START
+                time.sleep(SAMPLE_DT)
+                continue
 
-            elif state == State.SCAN_RIGHT:
-                # in-place clockwise spin
-                robot.right(TURN_SPEED)
+            if (now - last_seen) < LOST_AFTER:
+                robot.forward(FORWARD_SPEED * 0.8)
+                time.sleep(SAMPLE_DT)
+                continue
 
-                if on_line(b_sm):
-                    robot.stop()
-                    time.sleep(0.05)  # short settle
-                    robot.forward(FORWARD_SPEED)
-                    last_seen_time = time.monotonic()
-                    last_seen_side = +1
-                    state = State.FOLLOW
-                    continue
+            # Lost line → begin zig-zag search (arc + backup pattern)
+            robot.stop()
+            found = False
 
-                # Timeout → try the other side
-                if time.monotonic() - scan_start > SCAN_SIDE_TIME:
-                    robot.stop()
-                    state = State.SCAN_LEFT
-                    scan_start = time.monotonic()
-                    continue
+            # compute arc speeds: inner wheel slower by ARC_BIAS
+            inner = max(0.0, TURN_SPEED * (1.0 - ARC_BIAS))
+            outer = TURN_SPEED
 
-            elif state == State.SCAN_LEFT:
-                # in-place counter-clockwise spin
-                robot.left(TURN_SPEED)
+            # Choose direction based on sweep_left
+            if sweep_left:
+                # gpiozero: use robot.value=(left,right) for independent wheel speeds; forward() doesn't accept a tuple.
+                robot.value = (inner, outer)
+            else:
+                # forward-right arc: left wheel = outer, right wheel = inner
+                robot.value = (outer, inner)
 
-                if on_line(b_sm):
-                    robot.stop()
-                    time.sleep(0.05)
-                    robot.forward(FORWARD_SPEED)
-                    last_seen_time = time.monotonic()
-                    last_seen_side = -1
-                    state = State.FOLLOW
-                    continue
+            end_time = time.monotonic() + sweep_len
+            while time.monotonic() < end_time:
+                if is_black(read_brightness(), threshold):
+                    found = True
+                    break
+                time.sleep(SAMPLE_DT)
 
-                if time.monotonic() - scan_start > SCAN_SIDE_TIME:
-                    robot.stop()
-                    state = State.SCAN_RIGHT
-                    scan_start = time.monotonic()
-                    continue
+            robot.stop()
 
-            time.sleep(SAMPLE_DT)
+            if found:
+                # Reacquired: drive ahead briefly to re-center and reset sweep
+                robot.forward(FORWARD_SPEED)
+                last_seen = time.monotonic()
+                sweep_len = SWEEP_START
+                time.sleep(0.08)
+            else:
+                # Not found: back up a little to avoid drifting off course, then try the other side
+                robot.backward(BACKUP_SPEED)
+                time.sleep(BACKUP_TIME)
+                robot.stop()
+
+                sweep_left = not sweep_left
+                sweep_len = min(SWEEP_MAX, sweep_len + SWEEP_STEP)
+                time.sleep(0.03)
 
     except KeyboardInterrupt:
         robot.stop()
