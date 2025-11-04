@@ -98,12 +98,13 @@ def read_clear_channel():
     return r, g, b, c
 
 # --- SENSOR CONFIG ---
-def build_ir_channel():
-    # SPI + MCP3008 channel 0
-    spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
-    cs = digitalio.DigitalInOut(board.D5)  # GPIO5
-    mcp = MCP.MCP3008(spi, cs)
-    return AnalogIn(mcp, MCP.P0)
+
+# Build IR distance sensor channel
+# SPI + MCP3008 channel 0
+spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
+cs = digitalio.DigitalInOut(board.D5)  # GPIO5
+mcp = MCP.MCP3008(spi, cs)
+sensor = AnalogIn(mcp, MCP.P0)
 
 def too_close(voltage: float) -> bool:
     """Return True if something is within our 'unsafe' range."""
@@ -146,9 +147,7 @@ def too_close(voltage: float) -> bool:
 def loop():
     global error, previous_error, sum_error
 
-    chan0 = build_ir_channel()
-    
-    if too_close(chan0.voltage):
+    if too_close(sensor.voltage):
         robot.stop()
         return
 
