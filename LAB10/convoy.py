@@ -124,7 +124,7 @@ def check_obstacle_now():
     """
     global last_range_sample_t, last_voltage, blocked, clear_count
 
-    print(last_voltage)
+    print(last_range_sample_t)
 
     now = time.monotonic()
     if (now - last_range_sample_t) < SAMPLE_INTERVAL:
