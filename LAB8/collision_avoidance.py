@@ -56,6 +56,8 @@ def main():
             # --- Sensor handling ---
             last_voltage = chan0.voltage
 
+            print(last_voltage)
+
             if not too_close(last_voltage):
                 direction = ord('w')
                 moving_forward = True
